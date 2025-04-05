@@ -15,6 +15,16 @@ import { AddStudentDialog } from "@/components/admin/add-student-dialog"
 import { useToast } from "@/components/ui/use-toast"
 import * as XLSX from 'xlsx'
 
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString)
+  const options: Intl.DateTimeFormatOptions = {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }
+  return date.toLocaleDateString('en-US', options)
+}
+
 export default function StudentsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedClass, setSelectedClass] = useState("all")
@@ -193,6 +203,10 @@ export default function StudentsPage() {
         <div>
           <h1 className="text-2xl font-bold">Students</h1>
           <p className="text-muted-foreground">Manage and view all students</p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-secondary-foreground">
+          <MascotIcon className="h-5 w-5" />
+          <span className="text-sm font-medium">Today: {formatDate(new Date().toISOString())}</span>
         </div>
         <AddStudentDialog
           onStudentAdded={(student) => {

@@ -50,7 +50,7 @@ const LESSON_SCHEDULE = [
   { start: "11:40", end: "12:20", number: 5 },
   { start: "12:30", end: "13:10", number: 6 },
   { start: "13:20", end: "14:00", number: 7 },
-  { start: "14:10", end: "14:50", number: 8 }
+  { start: "14:10", end: "23:59", number: 8 }
 ]
 
 const getLateLessons = (time: string): string[] => {
