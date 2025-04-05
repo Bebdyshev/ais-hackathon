@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Download, Search, TrendingUp, Users, Clock, Award, Scan } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,10 +16,40 @@ import axiosInstance from "@/utils/instance"
 import { useToast } from "@/components/ui/use-toast"
 import * as XLSX from 'xlsx'
 
+interface Student {
+  id: string
+  name: string
+  email: string
+  class: string
+  curator: string
+  status: string
+  time: string
+  streak: number
+  points: number
+}
+
+interface AttendanceRecord {
+  name: string
+  time: string
+  date: string
+}
+
+interface AttendanceResponse {
+  status: string
+  attendance_data: AttendanceRecord[]
+}
+
+interface StudentsResponse {
+  status: string
+  students: Student[]
+}
+
 export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedClass, setSelectedClass] = useState("all")
   const [isLoading, setIsLoading] = useState(false)
+  const [attendanceData, setAttendanceData] = useState<Student[]>([])
+  const [students, setStudents] = useState<Student[]>([])
   const { toast } = useToast()
 
   // Mock user data
@@ -30,16 +60,65 @@ export default function AdminDashboard() {
     avatar: "/",
   }
 
-  // Mock student data
-  const students = [
-    { id: "S12345", name: "John Doe", class: "12A", status: "Present", time: "8:05 AM", streak: 5, points: 350 },
-    { id: "S12346", name: "Jane Smith", class: "12A", status: "Late", time: "8:32 AM", streak: 3, points: 280 },
-    { id: "S12347", name: "Michael Johnson", class: "12B", status: "Absent", time: "-", streak: 0, points: 210 },
-    { id: "S12348", name: "Emily Williams", class: "12B", status: "Present", time: "7:58 AM", streak: 10, points: 520 },
-    { id: "S12349", name: "Robert Brown", class: "12A", status: "Present", time: "8:01 AM", streak: 7, points: 410 },
-  ]
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await axiosInstance.get<StudentsResponse>('/students')
+        if (response.data.status === "success") {
+          setStudents(response.data.students)
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch students data",
+          variant: "destructive",
+        })
+      }
+    }
 
-  const filteredStudents = students.filter(
+    fetchStudents()
+  }, [])
+
+  useEffect(() => {
+    const fetchAttendanceData = async () => {
+      try {
+        setIsLoading(true)
+        const response = await axiosInstance.post<AttendanceResponse>('/data', {
+          date: new Date().toISOString().split('T')[0]
+        })
+
+        if (response.data.status === "success") {
+          // Process attendance data to get latest record for each student
+          const latestRecords = response.data.attendance_data.reduce((acc: Record<string, Student>, record: AttendanceRecord) => {
+            const student = students.find(s => s.name === record.name)
+            if (student) {
+              acc[student.id] = {
+                ...student,
+                time: record.time
+              }
+            }
+            return acc
+          }, {})
+
+          setAttendanceData(Object.values(latestRecords))
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch attendance data",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (students.length > 0) {
+      fetchAttendanceData()
+    }
+  }, [students])
+
+  const filteredStudents = attendanceData.filter(
     (student) =>
       (selectedClass === "all" || student.class === selectedClass) &&
       (student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -217,9 +296,15 @@ export default function AdminDashboard() {
             </CardTitle>
             <CardDescription>Today's attendance records</CardDescription>
           </div>
-          <Button variant="outline" size="sm" className="gap-2" onClick={handleDownloadReport}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-2" 
+            onClick={handleDownloadReport}
+            disabled={isLoading}
+          >
             <Download className="h-4 w-4" />
-            Export
+            {isLoading ? "Exporting..." : "Export"}
           </Button>
         </CardHeader>
         <CardContent className="p-6">
@@ -250,12 +335,12 @@ export default function AdminDashboard() {
                 <tr className="border-b">
                   <th className="px-4 py-3 text-left font-medium">ID</th>
                   <th className="px-4 py-3 text-left font-medium">Name</th>
+                  <th className="px-4 py-3 text-left font-medium">Email</th>
                   <th className="px-4 py-3 text-left font-medium">Class</th>
-                  <th className="px-4 py-3 text-left font-medium">Status</th>
+                  <th className="px-4 py-3 text-left font-medium">Curator</th>
                   <th className="px-4 py-3 text-left font-medium">Time</th>
                   <th className="px-4 py-3 text-left font-medium">Streak</th>
                   <th className="px-4 py-3 text-left font-medium">Points</th>
-                  <th className="px-4 py-3 text-left font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -288,20 +373,9 @@ export default function AdminDashboard() {
                         <span>{student.name}</span>
                       </div>
                     </td>
+                    <td className="px-4 py-3">{student.email}</td>
                     <td className="px-4 py-3">{student.class}</td>
-                    <td className="px-4 py-3">
-                      <Badge
-                        variant={
-                          student.status === "Present"
-                            ? "outline"
-                            : student.status === "Late"
-                              ? "secondary"
-                              : "destructive"
-                        }
-                      >
-                        {student.status}
-                      </Badge>
-                    </td>
+                    <td className="px-4 py-3">{student.curator}</td>
                     <td className="px-4 py-3">
                       {student.time !== "-" && (
                         <div className="flex items-center text-sm">
@@ -313,22 +387,6 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-4 py-3">{student.streak} days</td>
                     <td className="px-4 py-3">{student.points} XP</td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        <Link href={`/admin/students/${student.id}`}>
-                          <Button variant="outline" size="sm">
-                            View
-                          </Button>
-                        </Link>
-                        {student.status === "Late" && (
-                          <Link href="/admin/print-pass">
-                            <Button variant="outline" size="sm">
-                              Print Pass
-                            </Button>
-                          </Link>
-                        )}
-                      </div>
-                    </td>
                   </tr>
                 ))}
               </tbody>
