@@ -3,8 +3,10 @@ export interface Product {
     name: string
     description: string
     price: number
-    image: string
+    image?: string
     category: string
+    available: boolean
+    points: number
   }
   
   export interface CartItem extends Product {
@@ -19,7 +21,9 @@ export interface Product {
       price: 89,
       image:
         "https://www.coca-cola.com/content/dam/onexp/kz/ru/home-images/brands/brand-fusetea/desktop/fusetea-mango-pineapple_d.jpg",
-      category: "",
+      category: "drinks",
+      available: true,
+      points: 100,
     },
     {
       id: "p2",
@@ -28,7 +32,9 @@ export interface Product {
       price: 65,
       image:
         "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      category: "",
+      category: "drinks",
+      available: true,
+      points: 100,
     },
     {
       id: "p3",
@@ -37,7 +43,9 @@ export interface Product {
       price: 45,
       image:
         "https://img.oe.kz/bitrix-catalog/40526/1720313212-lzoal0g4tjmzrzmthj38onn31jju286t.jpg",
-      category: "",
+      category: "drinks",
+      available: true,
+      points: 100,
     },
     {
       id: "p4",
@@ -46,7 +54,9 @@ export interface Product {
       price: 79,
       image:
         "https://img.iamcook.ru/2021/upl/recipes/zen/u-906279da5f39acc8d9c27f6fa8295bd4.JPG",
-      category: "",
+      category: "food",
+      available: true,
+      points: 100,
     },
     {
       id: "p5",
@@ -55,7 +65,9 @@ export interface Product {
       price: 34,
       image:
         "https://vkusmart.vmv.kz/upload/iblock/53b/1mbip5vl64ybld6nb1of6r4j35cu7vtn.png",
-      category: "",
+      category: "drinks",
+      available: true,
+      points: 100,
     },
     {
       id: "p6",
@@ -64,8 +76,10 @@ export interface Product {
       price: 55,
       image:
         "https://cc.kz/upload/iblock/2d0/2d044714b087eb597bf6a0a9545e7fff.jpg",
-      category: "",
-    },
+      category: "snacks",
+      available: true,
+      points: 100,
+    },  
     {
       id: "p7",
       name: "Bounty Trio",
@@ -73,7 +87,9 @@ export interface Product {
       price: 42,
       image:
         "https://static.insales-cdn.com/images/products/1/526/301998606/%D0%91%D0%B0%D1%82%D0%BE%D0%BD%D1%87%D0%B8%D0%BA_%D1%88%D0%BE%D0%BA%D0%BE%D0%BB%D0%B0%D0%B4%D0%BD%D1%8B%D0%B9_BOUNTY_%D0%A2%D1%80%D0%B8%D0%BE_82_5_%D0%B3.jpg",
-      category: "",
+      category: "snacks", 
+      available: true,
+      points: 100,
     },
     {
       id: "p9",
@@ -82,6 +98,8 @@ export interface Product {
       price: 38,
       image:
         "https://cc.kz/upload/iblock/11e/11e6e2c82bbf0be986caf712cd13a8f9.jpg",
-      category: "",
+      category: "snacks",
+      available: true,
+      points: 100,
     },
   ]

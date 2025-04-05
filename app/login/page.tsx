@@ -63,7 +63,7 @@ export default function LoginPage() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white">
               <MascotIcon className="h-10 w-10" />
             </div>
-            <CardTitle className="text-2xl font-bold">Welcome to SmartAttend</CardTitle>
+            <CardTitle className="text-2xl font-bold">Welcome to Qatysu</CardTitle>
             <CardDescription className="text-white/80">Login to access your attendance dashboard</CardDescription>
           </div>
           <CardContent className="p-6 pt-8">
