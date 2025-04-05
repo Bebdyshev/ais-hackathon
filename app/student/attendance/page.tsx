@@ -8,15 +8,17 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AttendanceRecord } from "@/components/attendance/attendance-record"
 import { MascotIcon } from "@/components/ui/mascot-icon"
+import { usePoints } from "@/context/points-context"
 
 export default function AttendancePage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedPeriod, setSelectedPeriod] = useState("current")
+  const { points, updatePoints } = usePoints()
 
   // Mock user data
   const user = {
-    name: "John Doe",
-    email: "john.doe@student.edu",
+    name: "Berdyshev Kerey",
+    email: "kerey@student.edu",
     role: "student" as const,
     avatar: "/placeholder.svg?height=40&width=40",
   }

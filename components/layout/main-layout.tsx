@@ -2,7 +2,7 @@
 
 import { type ReactNode, useState } from "react"
 import Link from "next/link"
-import { Bell, Home, Menu, User, Users, QrCode, BarChart3, Settings, GraduationCap, Trophy, Map, UserCircle } from "lucide-react"
+import { Bell, Home, Menu, User, Users, QrCode, BarChart3, Settings, GraduationCap, Trophy, Map, UserCircle, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -46,6 +46,11 @@ export function MainLayout({ children, user }: MainLayoutProps) {
       title: "AI Assistant",
       href: "https://aishack-ai.vercel.app/",
       icon: Map,
+    },
+    {
+      title: "Shop",
+      href: "/student/shop",
+      icon: ShoppingBag,
     },
     {
       title: "Profile",

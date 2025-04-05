@@ -1,23 +1,39 @@
 "use client"
 
+import { useState } from "react"
+import { Medal, Trophy, Award, Star } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MainLayout } from "@/components/layout/main-layout"
+import { Button } from "@/components/ui/button"
+import { usePoints } from "@/context/points-context"
 import { AchievementCard } from "@/components/gamification/achievement-card"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MascotIcon } from "@/components/ui/mascot-icon"
 import { Progress } from "@/components/ui/progress"
 
 export default function AchievementsPage() {
+  const { points, updatePoints } = usePoints()
+  const [selectedCategory, setSelectedCategory] = useState("all")
+
   // Mock user data
   const user = {
-    name: "John Doe",
-    email: "john.doe@student.edu",
+    name: "Berdyshev Kerey",
+    email: "kerey@student.edu",
     role: "student" as const,
     avatar: "/placeholder.svg?height=40&width=40",
   }
 
   // Mock achievements data
-  const unlockedAchievements = [
+  interface Achievement {
+    id: number
+    name: string
+    description: string
+    unlocked: boolean
+    points: number
+    date?: string
+  }
+
+  const unlockedAchievements: Achievement[] = [
     {
       id: 1,
       name: "Perfect Week",
@@ -52,7 +68,7 @@ export default function AchievementsPage() {
     },
   ]
 
-  const lockedAchievements = [
+  const lockedAchievements: Achievement[] = [
     { id: 5, name: "Consistency King", description: "30-day attendance streak", unlocked: false, points: 100 },
     { id: 6, name: "Semester Star", description: "95% on-time for a semester", unlocked: false, points: 150 },
     { id: 7, name: "Time Master", description: "Never be late for a full month", unlocked: false, points: 75 },

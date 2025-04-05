@@ -8,25 +8,28 @@ import { Button } from "@/components/ui/button"
 import { Settings } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { AchievementCard } from "@/components/gamification/achievement-card"
+import { usePoints } from "@/context/points-context"
 
 export default function ProfilePage() {
+  const { points } = usePoints()
+
   // Mock user data
   const user = {
-    name: "John Doe",
-    email: "john.doe@student.edu",
+    name: "Berdyshev Kerey",
+    email: "kerey@student.edu",
     role: "student" as const,
     avatar: "/",
   }
 
   // Mock student data
   const studentData = {
-    id: "S12345",
-    name: "John Doe",
-    email: "john.doe@student.edu",
+    id: "071004553794",
+    name: "Berdyshev Kerey",
+    email: "kerey@student.edu",
     class: "12A",
     level: 3,
     progress: 65,
-    points: 350,
+    points: points, // Use points from context
     streak: 5,
     joinDate: "September 1, 2024",
     totalDays: 49,

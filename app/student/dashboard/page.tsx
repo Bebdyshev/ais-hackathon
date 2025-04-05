@@ -12,17 +12,18 @@ import { StreakCounter } from "@/components/gamification/streak-counter"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { MascotIcon } from "@/components/ui/mascot-icon"
+import { usePoints } from "@/context/points-context"
 
 export default function StudentDashboard() {
   const [streak, setStreak] = useState(5)
-  const [points, setPoints] = useState(350)
+  const { points, updatePoints } = usePoints()
   const [level, setLevel] = useState(3)
   const [progress, setProgress] = useState(65)
 
   // Mock user data
   const user = {
-    name: "John Doe",
-    email: "john.doe@student.edu",
+    name: "Berdyshev Kerey",
+    email: "kerey@student.edu",
     role: "student" as const,
     avatar: "/placeholder.svg?height=40&width=40",
   }
@@ -53,8 +54,8 @@ export default function StudentDashboard() {
           value={points}
           subtitle="XP"
           icon={<Medal className="h-5 w-5 text-yellow-500" />}
-          trend="up"
-          trendValue="+25 this week"
+          trend={points > 0 ? "up" : points < 0 ? "down" : "neutral"}
+          trendValue={points - 0 + " this week"}
         />
         <StatsCard
           title="Attendance Rate"

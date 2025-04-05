@@ -1,16 +1,24 @@
 "use client"
 
+import { useState } from "react"
+import { Medal, Trophy, Award, Star, CheckCircle2 } from "lucide-react"
 import { MainLayout } from "@/components/layout/main-layout"
 import { DuolingoRoadmap } from "@/components/gamification/duolingo-roadmap"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { MascotIcon } from "@/components/ui/mascot-icon"
+import { Button } from "@/components/ui/button"
+import { usePoints } from "@/context/points-context"
 
 export default function RoadmapPage() {
+  const { points, updatePoints } = usePoints()
+  const [currentLevel, setCurrentLevel] = useState(3)
+  const [progress, setProgress] = useState(65)
+
   // Mock user data
   const user = {
-    name: "John Doe",
-    email: "john.doe@student.edu",
+    name: "Berdyshev Kerey",
+    email: "kerey@student.edu",
     role: "student" as const,
     avatar: "/placeholder.svg?height=40&width=40",
   }
