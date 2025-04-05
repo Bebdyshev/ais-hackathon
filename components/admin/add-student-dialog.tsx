@@ -32,6 +32,7 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
   const [email, setEmail] = useState("")
   const [studentClass, setStudentClass] = useState("")
   const [photoUrl, setPhotoUrl] = useState("")
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
@@ -42,6 +43,9 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
 
     setIsUploading(true)
 
+    // Store the file for later upload
+    setPhotoFile(file)
+    
     // Create a local object URL for the file
     const objectUrl = URL.createObjectURL(file)
     setPhotoUrl(objectUrl)
@@ -50,12 +54,58 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
 
   const handleRemovePhoto = () => {
     setPhotoUrl("")
+    setPhotoFile(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const uploadPhoto = async (name: string, file: File): Promise<boolean> => {
+    try {
+      // Create FormData object
+      const formData = new FormData()
+      formData.append('name1', name.replace(/\s+/g, '_')) // Replace spaces with underscores
+      formData.append('image', file)
+      
+      // Upload the file to the server using fetch
+      const response = await fetch('http://127.0.0.1:8000/name', {
+        method: 'POST',
+        body: formData,
+        // No need to set Content-Type header, fetch will set it automatically with boundary for multipart/form-data
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      if (data.status === 'success') {
+        toast({
+          title: "Photo Uploaded",
+          description: data.message,
+          variant: "default",
+        })
+        return true
+      } else {
+        toast({
+          title: "Upload Failed",
+          description: data.message || "Unknown error occurred",
+          variant: "destructive",
+        })
+        return false
+      }
+    } catch (error: any) {
+      toast({
+        title: "Upload Error",
+        description: error.message || "Failed to upload photo",
+        variant: "destructive",
+      })
+      return false
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     // Validate form
@@ -68,34 +118,63 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
       return
     }
 
-    // Create new student object
-    const newStudent = {
-      id: studentId,
-      name: fullName,
-      email,
-      class: studentClass,
-      avatar: photoUrl || undefined,
-      status: "Active",
-      points: 0,
-      streak: 0,
-      attendanceRate: "0%",
+    if (!photoFile) {
+      toast({
+        title: "Missing Photo",
+        description: "Please upload a student photo.",
+        variant: "destructive",
+      })
+      return
     }
 
-    // Call the callback function if provided
-    if (onStudentAdded) {
-      onStudentAdded(newStudent)
+    setIsUploading(true)
+
+    try {
+      // First upload the photo
+      const uploadSuccess = await uploadPhoto(fullName, photoFile)
+      
+      if (!uploadSuccess) {
+        setIsUploading(false)
+        return
+      }
+
+      // Create new student object
+      const newStudent = {
+        id: studentId,
+        name: fullName,
+        email,
+        class: studentClass,
+        avatar: photoUrl || undefined,
+        status: "Active",
+        points: 0,
+        streak: 0,
+        attendanceRate: "0%",
+      }
+
+      // Call the callback function if provided
+      if (onStudentAdded) {
+        onStudentAdded(newStudent)
+      }
+
+      // Show success message
+      toast({
+        title: "Student Added",
+        description: `${fullName} has been successfully added.`,
+        variant: "default",
+      })
+
+      // Reset form and close dialog
+      resetForm()
+      setOpen(false)
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add student",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUploading(false)
     }
-
-    // Show success message
-    toast({
-      title: "Student Added",
-      description: `${fullName} has been successfully added.`,
-      variant: "default",
-    })
-
-    // Reset form and close dialog
-    resetForm()
-    setOpen(false)
   }
 
   const resetForm = () => {
@@ -104,6 +183,7 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
     setEmail("")
     setStudentClass("")
     setPhotoUrl("")
+    setPhotoFile(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -203,10 +283,10 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
                       <SelectValue placeholder="Select class" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="12A">Class 12A</SelectItem>
-                      <SelectItem value="12B">Class 12B</SelectItem>
-                      <SelectItem value="11A">Class 11A</SelectItem>
-                      <SelectItem value="11B">Class 11B</SelectItem>
+                      <SelectItem value="11H">11H</SelectItem>
+                      <SelectItem value="11D">11D</SelectItem>
+                      <SelectItem value="11A">11A</SelectItem>
+                      <SelectItem value="11B">11B</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -238,10 +318,12 @@ export function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
           </div>
 
           <DialogFooter className="sm:justify-end">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isUploading}>
               Cancel
             </Button>
-            <Button type="submit">Add Student</Button>
+            <Button type="submit" disabled={isUploading}>
+              {isUploading ? "Uploading..." : "Add Student"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

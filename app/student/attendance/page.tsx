@@ -61,14 +61,27 @@ export default function AttendancePage() {
     // Fill April 1-5 as present
     if (month === 3 && year === todayYear) { // April is month 3 (0-based)
       for (let i = 1; i <= 5; i++) {
+        // Check if this day is a weekend
+        const dayOfWeek = new Date(year, month, i).getDay()
+        if (dayOfWeek === 0 || dayOfWeek === 6) continue // Skip weekends (0 = Sunday, 6 = Saturday)
+        
         data[i] = { status: "present", time: "8:00 AM" }
       }
-      data[3] = { status: "late", time: "8:25 AM" }
+      
+      // Only mark day 3 as late if it's not a weekend
+      const day3OfWeek = new Date(year, month, 3).getDay()
+      if (day3OfWeek !== 0 && day3OfWeek !== 6) {
+        data[3] = { status: "present", time: "8:25 AM" }
+      }
     }
 
     // Fill March completely
     if (month === 2 && year === todayYear) { // March is month 2 (0-based)
       for (let i = 1; i <= daysInMonth; i++) {
+        // Check if this day is a weekend
+        const dayOfWeek = new Date(year, month, i).getDay()
+        if (dayOfWeek === 0 || dayOfWeek === 6) continue // Skip weekends
+        
         const random = Math.random()
         if (random < 0.7) {
           data[i] = { status: "present", time: "8:00 AM" }
@@ -77,14 +90,23 @@ export default function AttendancePage() {
         } else {
           data[i] = { status: "absent", time: "-" }
         }
-      data[31] = { status: "absent", time: "8:00 AM" }
-
+      }
+      
+      // Only mark day 31 as absent if it's not a weekend
+      const day31OfWeek = new Date(year, month, 31).getDay()
+      if (day31OfWeek !== 0 && day31OfWeek !== 6) {
+        data[28] = { status: "late", time: "8:20 AM" }
+        data[31] = { status: "present", time: "8:00 AM" }
       }
     }
 
     // Fill other months completely
     if (month !== 2 && month !== 3) { // Not March or April
       for (let i = 1; i <= daysInMonth; i++) {
+        // Check if this day is a weekend
+        const dayOfWeek = new Date(year, month, i).getDay()
+        if (dayOfWeek === 0 || dayOfWeek === 6) continue // Skip weekends
+        
         const random = Math.random()
         if (random < 0.7) {
           data[i] = { status: "present", time: "8:00 AM" }
@@ -99,6 +121,10 @@ export default function AttendancePage() {
     // Fill the rest of April with random attendance
     if (month === 3 && year === todayYear) { // April
       for (let i = 6; i <= daysInMonth; i++) {
+        // Check if this day is a weekend
+        const dayOfWeek = new Date(year, month, i).getDay()
+        if (dayOfWeek === 0 || dayOfWeek === 6) continue // Skip weekends
+        
         if (i < currentDay) {
           const random = Math.random()
           if (random < 0.7) {
@@ -187,11 +213,15 @@ export default function AttendancePage() {
             {Array.from({ length: daysInMonth }).map((_, index) => {
               const day = index + 1
               const statusColor = getStatusColor(day)
-
+              const dayDate = new Date(year, selectedMonth.getMonth(), day)
+              const isWeekend = dayDate.getDay() === 0 || dayDate.getDay() === 6
+              
               return (
                 <div
                   key={`day-${day}`}
-                  className={`cursor-pointer rounded-lg p-2 text-center hover:bg-muted ${statusColor}`}
+                  className={`cursor-pointer rounded-lg p-2 text-center hover:bg-muted ${statusColor} ${
+                    isWeekend ? "bg-gray-100 text-gray-400" : ""
+                  }`}
                 >
                   {day}
                 </div>
