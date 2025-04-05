@@ -11,7 +11,7 @@ import { MascotIcon } from "@/components/ui/mascot-icon"
 import { usePoints } from "@/context/points-context"
 
 export default function AttendancePage() {
-  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [selectedMonth, setSelectedMonth] = useState(new Date())
   const [selectedPeriod, setSelectedPeriod] = useState("current")
   const { points, updatePoints } = usePoints()
 
@@ -23,19 +23,19 @@ export default function AttendancePage() {
     avatar: "/placeholder.svg?height=40&width=40",
   }
 
-  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate()
+  const daysInMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0).getDate()
 
-  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay()
+  const firstDayOfMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1).getDay()
 
-  const monthName = currentMonth.toLocaleString('en', { month: "long" })
-  const year = currentMonth.getFullYear()
+  const monthName = selectedMonth.toLocaleString('en', { month: "long" })
+  const year = selectedMonth.getFullYear()
 
   const previousMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))
+    setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1))
   }
 
   const nextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
+    setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 1))
   }
 
   // Mock attendance data
@@ -46,18 +46,76 @@ export default function AttendancePage() {
     time: string
   }
 
-  const attendanceData: Record<number, DayAttendance> = {
-    1: { status: "present", time: "7:58 AM" },
-    2: { status: "present", time: "8:02 AM" },
-    3: { status: "late", time: "8:15 AM" },
-    4: { status: "present", time: "7:55 AM" },
-    5: { status: "present", time: "8:01 AM" },
-    8: { status: "present", time: "7:59 AM" },
-    9: { status: "present", time: "8:03 AM" },
-    10: { status: "absent", time: "-" },
-    11: { status: "present", time: "8:00 AM" },
-    12: { status: "present", time: "7:57 AM" },
+  const today = new Date()
+  const currentDay = today.getDate()
+  const todayMonth = today.getMonth()
+  const todayYear = today.getFullYear()
+
+  // Generate attendance data for the selected month
+  const generateAttendanceData = () => {
+    const data: Record<number, DayAttendance> = {}
+    const month = selectedMonth.getMonth()
+    const year = selectedMonth.getFullYear()
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+    // Fill April 1-5 as present
+    if (month === 3 && year === todayYear) { // April is month 3 (0-based)
+      for (let i = 1; i <= 5; i++) {
+        data[i] = { status: "present", time: "8:00 AM" }
+      }
+      data[3] = { status: "late", time: "8:25 AM" }
+    }
+
+    // Fill March completely
+    if (month === 2 && year === todayYear) { // March is month 2 (0-based)
+      for (let i = 1; i <= daysInMonth; i++) {
+        const random = Math.random()
+        if (random < 0.7) {
+          data[i] = { status: "present", time: "8:00 AM" }
+        } else if (random < 0.9) {
+          data[i] = { status: "late", time: "8:15 AM" }
+        } else {
+          data[i] = { status: "absent", time: "-" }
+        }
+      data[31] = { status: "absent", time: "8:00 AM" }
+
+      }
+    }
+
+    // Fill other months completely
+    if (month !== 2 && month !== 3) { // Not March or April
+      for (let i = 1; i <= daysInMonth; i++) {
+        const random = Math.random()
+        if (random < 0.7) {
+          data[i] = { status: "present", time: "8:00 AM" }
+        } else if (random < 0.9) {
+          data[i] = { status: "late", time: "8:15 AM" }
+        } else {
+          data[i] = { status: "absent", time: "-" }
+        }
+      }
+    }
+
+    // Fill the rest of April with random attendance
+    if (month === 3 && year === todayYear) { // April
+      for (let i = 6; i <= daysInMonth; i++) {
+        if (i < currentDay) {
+          const random = Math.random()
+          if (random < 0.7) {
+            data[i] = { status: "present", time: "8:00 AM" }
+          } else if (random < 0.9) {
+            data[i] = { status: "late", time: "8:15 AM" }
+          } else {
+            data[i] = { status: "absent", time: "-" }
+          }
+        }
+      }
+    }
+
+    return data
   }
+
+  const attendanceData = generateAttendanceData()
 
   const getStatusColor = (day: number) => {
     if (!attendanceData[day]) return ""

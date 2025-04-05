@@ -40,7 +40,7 @@ export function SidebarNav({ items, onItemClick }: SidebarNavProps) {
         <Link href="/" onClick={onItemClick}>
           <Button
             variant="outline"
-            className="w-full justify-start border-destructive text-destructive hover:bg-destructive/10"
+            className="w-full justify-start border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="mr-2 h-4 w-4" />
             Logout
