@@ -16,22 +16,18 @@ import axiosInstance from "@/utils/instance"
 import { useToast } from "@/components/ui/use-toast"
 import * as XLSX from 'xlsx'
 
-interface Student {
+interface StudentInfo {
   id: string
   name: string
-  email: string
   class: string
   curator: string
-  status: string
-  time: string
-  streak: number
-  points: number
 }
 
 interface AttendanceRecord {
   name: string
   time: string
   date: string
+  studentInfo?: StudentInfo
 }
 
 interface AttendanceResponse {
@@ -41,15 +37,14 @@ interface AttendanceResponse {
 
 interface StudentsResponse {
   status: string
-  students: Student[]
+  students: StudentInfo[]
 }
 
 export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedClass, setSelectedClass] = useState("all")
   const [isLoading, setIsLoading] = useState(false)
-  const [attendanceData, setAttendanceData] = useState<Student[]>([])
-  const [students, setStudents] = useState<Student[]>([])
+  const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([])
   const { toast } = useToast()
 
   // Mock user data
@@ -60,24 +55,27 @@ export default function AdminDashboard() {
     avatar: "/",
   }
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const response = await axiosInstance.get<StudentsResponse>('/students')
-        if (response.data.status === "success") {
-          setStudents(response.data.students)
-        }
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch students data",
-          variant: "destructive",
-        })
-      }
+  // Student information dictionary
+  const studentInfoDict: Record<string, StudentInfo> = {
+    "KEREY": {
+      id: "071004553794",
+      name: "Бердышев Керей",
+      class: "11H",
+      curator: "Самал Талгаткызы"
+    },
+    "JAFAR": {
+      id: "070708551158",
+      name: "Мажитов Джафар",
+      class: "11D",
+      curator: "Ботагоз Бауыржановна"
+    },
+    "AZIZ": {
+      id: "080424552629",
+      name: "Габитов Абдулазиз",
+      class: "11H",
+      curator: "Самал Талгаткызы"
     }
-
-    fetchStudents()
-  }, [])
+  }
 
   useEffect(() => {
     const fetchAttendanceData = async () => {
@@ -88,13 +86,13 @@ export default function AdminDashboard() {
         })
 
         if (response.data.status === "success") {
-          // Process attendance data to get latest record for each student
-          const latestRecords = response.data.attendance_data.reduce((acc: Record<string, Student>, record: AttendanceRecord) => {
-            const student = students.find(s => s.name === record.name)
-            if (student) {
-              acc[student.id] = {
-                ...student,
-                time: record.time
+          // Get latest record for each student and add student info
+          const latestRecords = response.data.attendance_data.reduce((acc: Record<string, AttendanceRecord>, record) => {
+            const studentInfo = studentInfoDict[record.name]
+            if (studentInfo) {
+              acc[record.name] = {
+                ...record,
+                studentInfo
               }
             }
             return acc
@@ -113,21 +111,18 @@ export default function AdminDashboard() {
       }
     }
 
-    if (students.length > 0) {
-      fetchAttendanceData()
-    }
-  }, [students])
+    fetchAttendanceData()
+  }, [])
 
   const filteredStudents = attendanceData.filter(
     (student) =>
-      (selectedClass === "all" || student.class === selectedClass) &&
-      (student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        student.id.toLowerCase().includes(searchQuery.toLowerCase())),
+      student.studentInfo?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      student.studentInfo?.id.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const handleMarkAttendance = (student: any, status: "present" | "late") => {
     // In a real app, this would update the database
-    alert(`Marked ${student.name} as ${status}`)
+    alert(`Marked ${student.studentInfo?.name} as ${status}`)
   }
 
   const handleScanRequest = async () => {
@@ -162,25 +157,23 @@ export default function AdminDashboard() {
       // Create worksheet
       const ws = XLSX.utils.json_to_sheet(
         filteredStudents.map(student => ({
-          'Student ID': student.id,
-          'Name': student.name,
-          'Class': student.class,
-          'Status': student.status,
+          'Student ID': student.studentInfo?.id,
+          'Name': student.studentInfo?.name,
+          'Class': student.studentInfo?.class,
+          'Curator': student.studentInfo?.curator,
           'Time': student.time,
-          'Streak': student.streak,
-          'Points': student.points
+          'Date': student.date
         }))
       )
 
       // Set column widths
       const wscols = [
-        {wch: 10}, // Student ID
+        {wch: 15}, // Student ID
         {wch: 20}, // Name
         {wch: 8},  // Class
-        {wch: 10}, // Status
+        {wch: 20}, // Curator
         {wch: 10}, // Time
-        {wch: 8},  // Streak
-        {wch: 8}   // Points
+        {wch: 12}  // Date
       ]
       ws['!cols'] = wscols
 
@@ -318,16 +311,6 @@ export default function AdminDashboard() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Select value={selectedClass} onValueChange={setSelectedClass}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select class" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Classes</SelectItem>
-                <SelectItem value="12A">Class 12A</SelectItem>
-                <SelectItem value="12B">Class 12B</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full table-auto">
@@ -335,58 +318,39 @@ export default function AdminDashboard() {
                 <tr className="border-b">
                   <th className="px-4 py-3 text-left font-medium">ID</th>
                   <th className="px-4 py-3 text-left font-medium">Name</th>
-                  <th className="px-4 py-3 text-left font-medium">Email</th>
                   <th className="px-4 py-3 text-left font-medium">Class</th>
                   <th className="px-4 py-3 text-left font-medium">Curator</th>
                   <th className="px-4 py-3 text-left font-medium">Time</th>
-                  <th className="px-4 py-3 text-left font-medium">Streak</th>
-                  <th className="px-4 py-3 text-left font-medium">Points</th>
+                  <th className="px-4 py-3 text-left font-medium">Date</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredStudents.map((student, index) => (
                   <tr key={index} className="border-b">
-                    <td className="px-4 py-3">{student.id}</td>
+                    <td className="px-4 py-3">{student.studentInfo?.id}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <Avatar className={`h-8 w-8 border-2 ${
-                          student.status === "Present" 
-                            ? "border-primary/20" 
-                            : student.status === "Late"
-                              ? "border-yellow-500/20"
-                              : "border-red-500/20"
-                        }`}>
-                          <AvatarImage src="/" alt={student.name} />
-                          <AvatarFallback className={`${
-                            student.status === "Present"
-                              ? "bg-primary/10 text-primary"
-                              : student.status === "Late"
-                                ? "bg-yellow-500/10 text-yellow-600"
-                                : "bg-red-500/10 text-red-600"
-                          }`}>
-                            {student.name
+                        <Avatar className="h-8 w-8 border-2 border-primary/20">
+                          <AvatarImage src="/" alt={student.studentInfo?.name} />
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {student.studentInfo?.name
                               .split(" ")
                               .map((n) => n[0])
                               .join("")}
                           </AvatarFallback>
                         </Avatar>
-                        <span>{student.name}</span>
+                        <span>{student.studentInfo?.name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3">{student.email}</td>
-                    <td className="px-4 py-3">{student.class}</td>
-                    <td className="px-4 py-3">{student.curator}</td>
+                    <td className="px-4 py-3">{student.studentInfo?.class}</td>
+                    <td className="px-4 py-3">{student.studentInfo?.curator}</td>
                     <td className="px-4 py-3">
-                      {student.time !== "-" && (
-                        <div className="flex items-center text-sm">
-                          <Clock className="mr-1 h-3 w-3" />
-                          {student.time}
-                        </div>
-                      )}
-                      {student.time === "-" && "-"}
+                      <div className="flex items-center text-sm">
+                        <Clock className="mr-1 h-3 w-3" />
+                        {student.time}
+                      </div>
                     </td>
-                    <td className="px-4 py-3">{student.streak} days</td>
-                    <td className="px-4 py-3">{student.points} XP</td>
+                    <td className="px-4 py-3">{student.date}</td>
                   </tr>
                 ))}
               </tbody>
