@@ -28,6 +28,7 @@ interface AttendanceRecord {
   time: string
   date: string
   studentInfo?: StudentInfo
+  lateLessons?: string[]
 }
 
 interface AttendanceResponse {
@@ -40,11 +41,50 @@ interface StudentsResponse {
   students: StudentInfo[]
 }
 
+// Lesson schedule
+const LESSON_SCHEDULE = [
+  { start: "8:20", end: "9:00", number: 1 },
+  { start: "9:10", end: "9:50", number: 2 },
+  { start: "10:00", end: "10:40", number: 3 },
+  { start: "10:50", end: "11:30", number: 4 },
+  { start: "11:40", end: "12:20", number: 5 },
+  { start: "12:30", end: "13:10", number: 6 },
+  { start: "13:20", end: "14:00", number: 7 },
+  { start: "14:10", end: "14:50", number: 8 }
+]
+
+const getLateLessons = (time: string): string[] => {
+  const [hours, minutes] = time.split(":").map(Number)
+  const arrivalTime = hours * 60 + minutes
+  const lateLessons: string[] = []
+
+  LESSON_SCHEDULE.forEach(lesson => {
+    const [startHours, startMinutes] = lesson.start.split(":").map(Number)
+    const lessonStartTime = startHours * 60 + startMinutes
+
+    if (arrivalTime > lessonStartTime) {
+      lateLessons.push(lesson.number.toString())
+    }
+  })
+
+  return lateLessons
+}
+
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString)
+  const options: Intl.DateTimeFormatOptions = {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }
+  return date.toLocaleDateString('en-US', options)
+}
+
 export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedClass, setSelectedClass] = useState("all")
   const [isLoading, setIsLoading] = useState(false)
-  const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([])
+  const [attendanceData, setAttendanceData] = useState<Record<string, AttendanceRecord[]>>({})
   const { toast } = useToast()
 
   // Mock user data
@@ -86,19 +126,32 @@ export default function AdminDashboard() {
         })
 
         if (response.data.status === "success") {
-          // Get latest record for each student and add student info
-          const latestRecords = response.data.attendance_data.reduce((acc: Record<string, AttendanceRecord>, record) => {
+          // Group records by student name
+          const groupedRecords = response.data.attendance_data.reduce((acc: Record<string, AttendanceRecord[]>, record) => {
             const studentInfo = studentInfoDict[record.name]
             if (studentInfo) {
-              acc[record.name] = {
-                ...record,
-                studentInfo
+              if (!acc[record.name]) {
+                acc[record.name] = []
               }
+              acc[record.name].push({
+                ...record,
+                studentInfo,
+                lateLessons: getLateLessons(record.time)
+              })
             }
             return acc
           }, {})
 
-          setAttendanceData(Object.values(latestRecords))
+          // Sort records by time within each group
+          Object.keys(groupedRecords).forEach(name => {
+            groupedRecords[name].sort((a, b) => {
+              const [aHours, aMinutes] = a.time.split(":").map(Number)
+              const [bHours, bMinutes] = b.time.split(":").map(Number)
+              return (aHours * 60 + aMinutes) - (bHours * 60 + bMinutes)
+            })
+          })
+
+          setAttendanceData(groupedRecords)
         }
       } catch (error) {
         toast({
@@ -114,10 +167,10 @@ export default function AdminDashboard() {
     fetchAttendanceData()
   }, [])
 
-  const filteredStudents = attendanceData.filter(
-    (student) =>
-      student.studentInfo?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.studentInfo?.id.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredStudents = Object.entries(attendanceData).filter(
+    ([name, records]) =>
+      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      records[0].studentInfo?.id.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const handleMarkAttendance = (student: any, status: "present" | "late") => {
@@ -156,13 +209,14 @@ export default function AdminDashboard() {
       
       // Create worksheet
       const ws = XLSX.utils.json_to_sheet(
-        filteredStudents.map(student => ({
-          'Student ID': student.studentInfo?.id,
-          'Name': student.studentInfo?.name,
-          'Class': student.studentInfo?.class,
-          'Curator': student.studentInfo?.curator,
-          'Time': student.time,
-          'Date': student.date
+        filteredStudents.map(([name, records]) => ({
+          'Student ID': records[0].studentInfo?.id,
+          'Name': records[0].studentInfo?.name,
+          'Class': records[0].studentInfo?.class,
+          'Curator': records[0].studentInfo?.curator,
+          'Time': records[0].time,
+          'Late Lessons': records[0].lateLessons ? records[0].lateLessons.join(", ") : "",
+          'Date': records[0].date
         }))
       )
 
@@ -173,6 +227,7 @@ export default function AdminDashboard() {
         {wch: 8},  // Class
         {wch: 20}, // Curator
         {wch: 10}, // Time
+        {wch: 20}, // Late Lessons
         {wch: 12}  // Date
       ]
       ws['!cols'] = wscols
@@ -320,37 +375,52 @@ export default function AdminDashboard() {
                   <th className="px-4 py-3 text-left font-medium">Name</th>
                   <th className="px-4 py-3 text-left font-medium">Class</th>
                   <th className="px-4 py-3 text-left font-medium">Curator</th>
-                  <th className="px-4 py-3 text-left font-medium">Time</th>
+                  <th className="px-4 py-3 text-left font-medium">Records</th>
                   <th className="px-4 py-3 text-left font-medium">Date</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredStudents.map((student, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="px-4 py-3">{student.studentInfo?.id}</td>
+                {filteredStudents.map(([name, records]) => (
+                  <tr key={name} className="border-b">
+                    <td className="px-4 py-3">{records[0].studentInfo?.id}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8 border-2 border-primary/20">
-                          <AvatarImage src="/" alt={student.studentInfo?.name} />
+                          <AvatarImage src="/" alt={records[0].studentInfo?.name} />
                           <AvatarFallback className="bg-primary/10 text-primary">
-                            {student.studentInfo?.name
+                            {records[0].studentInfo?.name
                               .split(" ")
                               .map((n) => n[0])
                               .join("")}
                           </AvatarFallback>
                         </Avatar>
-                        <span>{student.studentInfo?.name}</span>
+                        <span>{records[0].studentInfo?.name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3">{student.studentInfo?.class}</td>
-                    <td className="px-4 py-3">{student.studentInfo?.curator}</td>
+                    <td className="px-4 py-3">{records[0].studentInfo?.class}</td>
+                    <td className="px-4 py-3">{records[0].studentInfo?.curator}</td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center text-sm">
-                        <Clock className="mr-1 h-3 w-3" />
-                        {student.time}
+                      <div className="flex flex-col gap-2">
+                        {records.map((record, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <div className="flex items-center text-sm">
+                              <Clock className="mr-1 h-3 w-3" />
+                              {record.time}
+                            </div>
+                            {record.lateLessons && record.lateLessons.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {record.lateLessons.map(lesson => (
+                                  <Badge key={lesson} variant="destructive">
+                                    {lesson}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </td>
-                    <td className="px-4 py-3">{student.date}</td>
+                    <td className="px-4 py-3">{formatDate(records[0].date)}</td>
                   </tr>
                 ))}
               </tbody>
