@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Download, Search, TrendingUp, Users, Clock, Award } from "lucide-react"
+import { Download, Search, TrendingUp, Users, Clock, Award, Scan } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,13 +10,17 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MainLayout } from "@/components/layout/main-layout"
 import { StatsCard } from "@/components/attendance/stats-card"
-import { ScannerInterface } from "@/components/scanner/scanner-interface"
 import { MascotIcon } from "@/components/ui/mascot-icon"
 import Link from "next/link"
+import axiosInstance from "@/utils/instance"
+import { useToast } from "@/components/ui/use-toast"
+import * as XLSX from 'xlsx'
 
 export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedClass, setSelectedClass] = useState("all")
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
 
   // Mock user data
   const user = {
@@ -45,6 +49,93 @@ export default function AdminDashboard() {
   const handleMarkAttendance = (student: any, status: "present" | "late") => {
     // In a real app, this would update the database
     alert(`Marked ${student.name} as ${status}`)
+  }
+
+  const handleScanRequest = async () => {
+    try {
+      setIsLoading(true)
+      const response = await axiosInstance.post('/', {
+        timestamp: new Date().toISOString(),
+        location: 'main_entrance',
+        type: 'manual_scan'
+      })
+      
+      toast({
+        title: "Scan Successful",
+        description: "Attendance has been recorded",
+        variant: "default",
+      })
+    } catch (error) {
+      toast({
+        title: "Scan Failed",
+        description: "Please try again",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDownloadReport = async () => {
+    try {
+      setIsLoading(true)
+      
+      // Create worksheet
+      const ws = XLSX.utils.json_to_sheet(
+        filteredStudents.map(student => ({
+          'Student ID': student.id,
+          'Name': student.name,
+          'Class': student.class,
+          'Status': student.status,
+          'Time': student.time,
+          'Streak': student.streak,
+          'Points': student.points
+        }))
+      )
+
+      // Set column widths
+      const wscols = [
+        {wch: 10}, // Student ID
+        {wch: 20}, // Name
+        {wch: 8},  // Class
+        {wch: 10}, // Status
+        {wch: 10}, // Time
+        {wch: 8},  // Streak
+        {wch: 8}   // Points
+      ]
+      ws['!cols'] = wscols
+
+      // Create workbook
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, "Attendance Report")
+
+      // Generate Excel file
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+      
+      // Create blob and download
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `attendance_report_${new Date().toISOString().split('T')[0]}.xlsx`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+
+      toast({
+        title: "Report Downloaded",
+        description: "Attendance report has been downloaded successfully",
+        variant: "default",
+      })
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Failed to download the attendance report",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -100,7 +191,20 @@ export default function AdminDashboard() {
           <CardDescription>Scan student ID or face to mark attendance</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
-          <ScannerInterface onMarkAttendance={handleMarkAttendance} />
+          <div className="flex flex-col items-center gap-4">
+            <Button 
+              size="lg" 
+              className="gap-2" 
+              onClick={handleScanRequest}
+              disabled={isLoading}
+            >
+              <Scan className="h-5 w-5" />
+              {isLoading ? "Scanning..." : "Start Scan"}
+            </Button>
+            <p className="text-sm text-muted-foreground">
+              Click to manually record attendance
+            </p>
+          </div>
         </CardContent>
       </Card>
 
@@ -113,7 +217,7 @@ export default function AdminDashboard() {
             </CardTitle>
             <CardDescription>Today's attendance records</CardDescription>
           </div>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={handleDownloadReport}>
             <Download className="h-4 w-4" />
             Export
           </Button>

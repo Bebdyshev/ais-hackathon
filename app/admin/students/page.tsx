@@ -12,11 +12,15 @@ import { Search, Filter, Download } from "lucide-react"
 import Link from "next/link"
 import { MascotIcon } from "@/components/ui/mascot-icon"
 import { AddStudentDialog } from "@/components/admin/add-student-dialog"
+import { useToast } from "@/components/ui/use-toast"
+import * as XLSX from 'xlsx'
 
 export default function StudentsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedClass, setSelectedClass] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
 
   // Mock user data
   const user = {
@@ -119,6 +123,70 @@ export default function StudentsPage() {
         student.email.toLowerCase().includes(searchQuery.toLowerCase())),
   )
 
+  const handleDownloadReport = async () => {
+    try {
+      setIsLoading(true)
+      
+      // Create worksheet
+      const ws = XLSX.utils.json_to_sheet(
+        filteredStudents.map(student => ({
+          'Student ID': student.id,
+          'Name': student.name,
+          'Email': student.email,
+          'Class': student.class,
+          'Status': student.status,
+          'Points': student.points,
+          'Streak': student.streak,
+          'Attendance Rate': student.attendanceRate
+        }))
+      )
+
+      // Set column widths
+      const wscols = [
+        {wch: 10}, // Student ID
+        {wch: 20}, // Name
+        {wch: 25}, // Email
+        {wch: 8},  // Class
+        {wch: 10}, // Status
+        {wch: 8},  // Points
+        {wch: 8},  // Streak
+        {wch: 12}  // Attendance Rate
+      ]
+      ws['!cols'] = wscols
+
+      // Create workbook
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, "Students Report")
+
+      // Generate Excel file
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+      
+      // Create blob and download
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `students_report_${new Date().toISOString().split('T')[0]}.xlsx`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+
+      toast({
+        title: "Report Downloaded",
+        description: "Students report has been downloaded successfully",
+        variant: "default",
+      })
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Failed to download the students report",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <MainLayout user={user}>
       <div className="mb-6 flex items-center justify-between">
@@ -173,9 +241,14 @@ export default function StudentsPage() {
                 <SelectItem value="Inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" className="gap-2">
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              onClick={handleDownloadReport}
+              disabled={isLoading}
+            >
               <Download className="h-4 w-4" />
-              Export
+              {isLoading ? "Exporting..." : "Export"}
             </Button>
           </div>
         </CardContent>
