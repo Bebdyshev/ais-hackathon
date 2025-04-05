@@ -85,6 +85,7 @@ export default function AdminDashboard() {
   const [selectedClass, setSelectedClass] = useState("all")
   const [isLoading, setIsLoading] = useState(false)
   const [attendanceData, setAttendanceData] = useState<Record<string, AttendanceRecord[]>>({})
+  const [visibleLessonIndices, setVisibleLessonIndices] = useState<Record<string, number>>({})
   const { toast } = useToast()
 
   // Mock user data
@@ -152,6 +153,13 @@ export default function AdminDashboard() {
           })
 
           setAttendanceData(groupedRecords)
+          
+          // Initialize visible lesson indices
+          const initialIndices: Record<string, number> = {}
+          Object.keys(groupedRecords).forEach(name => {
+            initialIndices[name] = 0
+          })
+          setVisibleLessonIndices(initialIndices)
         }
       } catch (error) {
         toast({
@@ -172,6 +180,21 @@ export default function AdminDashboard() {
       name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       records[0].studentInfo?.id.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  // Function to navigate lessons
+  const navigateLesson = (studentName: string, direction: 'prev' | 'next', maxIndex: number) => {
+    setVisibleLessonIndices(prev => {
+      const currentIndex = prev[studentName] || 0
+      let newIndex = direction === 'next' 
+        ? Math.min(currentIndex + 1, maxIndex) 
+        : Math.max(currentIndex - 1, 0)
+      
+      return {
+        ...prev,
+        [studentName]: newIndex
+      }
+    })
+  }
 
   const handleMarkAttendance = (student: any, status: "present" | "late") => {
     // In a real app, this would update the database
@@ -408,12 +431,41 @@ export default function AdminDashboard() {
                               {record.time}
                             </div>
                             {record.lateLessons && record.lateLessons.length > 0 && (
-                              <div className="flex flex-wrap gap-1">
-                                {record.lateLessons.map(lesson => (
-                                  <Badge key={lesson} variant="destructive">
-                                    {lesson}
-                                  </Badge>
-                                ))}
+                              <div className="flex items-center gap-1">
+                                {record.lateLessons.length > 1 && (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-6 w-6 p-0"
+                                    onClick={() => navigateLesson(name, 'prev', record.lateLessons!.length - 1)}
+                                    disabled={visibleLessonIndices[name] === 0}
+                                  >
+                                    <span className="sr-only">Previous</span>
+                                    &lt;
+                                  </Button>
+                                )}
+                                
+                                <Badge variant="destructive">
+                                  {record.lateLessons[visibleLessonIndices[name] || 0]}
+                                </Badge>
+                                
+                                {record.lateLessons.length > 1 && (
+                                  <>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-6 w-6 p-0"
+                                      onClick={() => navigateLesson(name, 'next', record.lateLessons!.length - 1)}
+                                      disabled={visibleLessonIndices[name] === record.lateLessons!.length - 1}
+                                    >
+                                      <span className="sr-only">Next</span>
+                                      &gt;
+                                    </Button>
+                                    <span className="text-xs text-muted-foreground">
+                                      {visibleLessonIndices[name] + 1}/{record.lateLessons.length}
+                                    </span>
+                                  </>
+                                )}
                               </div>
                             )}
                           </div>

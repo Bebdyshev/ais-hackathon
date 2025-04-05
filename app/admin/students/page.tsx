@@ -41,91 +41,78 @@ export default function StudentsPage() {
     avatar: "/placeholder.svg?height=40&width=40",
   }
 
-  // Mock students data
-  const students = [
-    {
-      id: "S12345",
-      name: "John Doe",
-      class: "12A",
-      email: "john.doe@student.edu",
-      status: "Active",
-      points: 350,
-      streak: 5,
-      attendanceRate: "95.9%",
-      lastAttendance: "2025-04-05"
+  
+  // Student information dictionary
+  const studentInfoDict: Record<string, StudentInfo> = {
+    "KEREY": {
+      id: "071004553794",
+      name: "Бердышев Керей",
+      class: "11H",
+      curator: "Самал Талгаткызы"
     },
-    {
-      id: "S12346",
-      name: "Jane Smith",
-      class: "12A",
-      email: "jane.smith@student.edu",
-      status: "Active",
-      points: 280,
-      streak: 3,
-      attendanceRate: "92.3%",
-      lastAttendance: "2025-04-05"
+    "JAFAR": {
+      id: "070708551158",
+      name: "Мажитов Джафар",
+      class: "11D",
+      curator: "Ботагоз Бауыржановна"
     },
-    {
-      id: "S12347",
-      name: "Michael Johnson",
-      class: "12B",
-      email: "michael.j@student.edu",
-      status: "Inactive",
-      points: 210,
-      streak: 0,
-      attendanceRate: "78.5%",
-    },
-    {
-      id: "S12348",
-      name: "Emily Williams",
-      class: "12B",
-      email: "emily.w@student.edu",
-      status: "Active",
-      points: 520,
-      streak: 10,
-      attendanceRate: "98.1%",
-    },
-    {
-      id: "S12349",
-      name: "Robert Brown",
-      class: "12A",
-      email: "robert.b@student.edu",
-      status: "Active",
-      points: 410,
-      streak: 7,
-      attendanceRate: "94.2%",
-    },
-    {
-      id: "S12350",
-      name: "Sarah Davis",
-      class: "12B",
-      email: "sarah.d@student.edu",
-      status: "Active",
-      points: 290,
-      streak: 4,
-      attendanceRate: "91.7%",
-    },
-    {
-      id: "S12351",
-      name: "David Miller",
-      class: "12A",
-      email: "david.m@student.edu",
-      status: "Inactive",
-      points: 150,
-      streak: 0,
-      attendanceRate: "65.3%",
-    },
-    {
-      id: "S12352",
-      name: "Jennifer Wilson",
-      class: "12B",
-      email: "jennifer.w@student.edu",
-      status: "Active",
-      points: 380,
-      streak: 6,
-      attendanceRate: "93.8%",
-    },
-  ]
+    "AZIZ": {
+      id: "080424552629",
+      name: "Габитов Абдулазиз",
+      class: "11H",
+      curator: "Самал Талгаткызы"
+    }
+  }
+
+  useEffect(() => {
+    const fetchAttendanceData = async () => {
+      try {
+        setIsLoading(true)
+        const response = await axiosInstance.post<AttendanceResponse>('/data', {
+          date: new Date().toISOString().split('T')[0]
+        })
+
+        if (response.data.status === "success") {
+          // Group records by student name
+          const groupedRecords = response.data.attendance_data.reduce((acc: Record<string, AttendanceRecord[]>, record) => {
+            const studentInfo = studentInfoDict[record.name]
+            if (studentInfo) {
+              if (!acc[record.name]) {
+                acc[record.name] = []
+              }
+              acc[record.name].push({
+                ...record,
+                studentInfo,
+                lateLessons: getLateLessons(record.time)
+              })
+            }
+            return acc
+          }, {})
+
+          // Sort records by time within each group
+          Object.keys(groupedRecords).forEach(name => {
+            groupedRecords[name].sort((a, b) => {
+              const [aHours, aMinutes] = a.time.split(":").map(Number)
+              const [bHours, bMinutes] = b.time.split(":").map(Number)
+              return (aHours * 60 + aMinutes) - (bHours * 60 + bMinutes)
+            })
+          })
+
+          setAttendanceData(groupedRecords)
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch attendance data",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchAttendanceData()
+  }, [])
 
   const filteredStudents = students.filter(
     (student) =>
