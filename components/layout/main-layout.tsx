@@ -53,11 +53,6 @@ export function MainLayout({ children, user }: MainLayoutProps) {
       icon: Map,
     },
     {
-      title: "Shop",
-      href: "/student/shop",
-      icon: ShoppingBag,
-    },
-    {
       title: "Profile",
       href: "/student/profile",
       icon: UserCircle,
