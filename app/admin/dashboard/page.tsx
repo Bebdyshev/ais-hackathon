@@ -99,7 +99,6 @@ export default function AdminDashboard() {
   const [selectedClass, setSelectedClass] = useState("all")
   const [isLoading, setIsLoading] = useState(false)
   const [attendanceData, setAttendanceData] = useState<Record<string, NewAttendanceRecord[]>>({})
-  const [visibleLessonIndices, setVisibleLessonIndices] = useState<Record<string, number>>({})
   const { toast } = useToast()
 
   // Mock user data
@@ -129,6 +128,12 @@ export default function AdminDashboard() {
       name: "Габитов Абдулазиз",
       class: "11H",
       curator: "Самал Талгаткызы"
+    },
+    "MAKSIM": {
+      id: "071305556238",
+      name: "Коссов Максим",
+      class: "11H",
+      curator: "Самал Талгаткызы"
     }
   }
 
@@ -150,21 +155,53 @@ export default function AdminDashboard() {
               if (!groupedRecords[record.name]) {
                 groupedRecords[record.name] = []
               }
-              groupedRecords[record.name].push({
-                ...record,
-                studentInfo
-              })
+              
+              // Only include records with missed lessons
+              const missedLessons = record.attendance_info.filter(
+                info => info.status !== "after school"
+              )
+              
+              // Filter out records that are within 5 minutes of each other
+              const filteredMissedLessons = missedLessons.reduce((acc: AttendanceInfo[], curr, index, array) => {
+                if (index === 0) {
+                  acc.push(curr);
+                  return acc;
+                }
+
+                const prevRecord = acc[acc.length - 1];
+                const [prevHours, prevMinutes] = prevRecord.time.split(":").map(Number);
+                const [currHours, currMinutes] = curr.time.split(":").map(Number);
+
+                const prevTimeInMinutes = prevHours * 60 + prevMinutes;
+                const currTimeInMinutes = currHours * 60 + currMinutes;
+                const timeDifferenceInMinutes = currTimeInMinutes - prevTimeInMinutes;
+
+                // Only add the current record if it's more than 5 minutes after the previous one
+                if (timeDifferenceInMinutes > 5) {
+                  acc.push(curr);
+                }
+
+                return acc;
+              }, []);
+              
+              if (filteredMissedLessons.length > 0) {
+                groupedRecords[record.name].push({
+                  ...record,
+                  studentInfo,
+                  attendance_info: filteredMissedLessons
+                })
+              } else {
+                // If no missed lessons, still add the record but mark attendance_info as empty
+                groupedRecords[record.name].push({
+                  ...record,
+                  studentInfo,
+                  attendance_info: []
+                })
+              }
             }
           })
 
           setAttendanceData(groupedRecords)
-          
-          // Initialize visible lesson indices
-          const initialIndices: Record<string, number> = {}
-          Object.keys(groupedRecords).forEach(name => {
-            initialIndices[name] = 0
-          })
-          setVisibleLessonIndices(initialIndices)
         }
       } catch (error) {
         toast({
@@ -185,21 +222,6 @@ export default function AdminDashboard() {
       name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       records[0].studentInfo?.id.toLowerCase().includes(searchQuery.toLowerCase())
   )
-
-  // Function to navigate attendance records
-  const navigateAttendance = (studentName: string, direction: 'prev' | 'next', maxIndex: number) => {
-    setVisibleLessonIndices(prev => {
-      const currentIndex = prev[studentName] || 0
-      let newIndex = direction === 'next' 
-        ? Math.min(currentIndex + 1, maxIndex) 
-        : Math.max(currentIndex - 1, 0)
-      
-      return {
-        ...prev,
-        [studentName]: newIndex
-      }
-    })
-  }
 
   const handleMarkAttendance = (student: any, status: "present" | "late") => {
     // In a real app, this would update the database
@@ -239,7 +261,7 @@ export default function AdminDashboard() {
       const ws = XLSX.utils.json_to_sheet(
         Object.entries(attendanceData).flatMap(([name, records]) => 
           records.flatMap(record => 
-            record.attendance_info.map((info, index) => ({
+            record.attendance_info.map((info) => ({
               'Student ID': record.studentInfo?.id,
               'Name': record.studentInfo?.name,
               'Class': record.studentInfo?.class,
@@ -376,7 +398,7 @@ export default function AdminDashboard() {
               <MascotIcon className="h-5 w-5" />
               Student Attendance
             </CardTitle>
-            <CardDescription>Today's attendance records</CardDescription>
+            <CardDescription>Missed lessons</CardDescription>
           </div>
           <Button 
             variant="outline" 
@@ -409,8 +431,7 @@ export default function AdminDashboard() {
                   <th className="px-4 py-3 text-left font-medium">Name</th>
                   <th className="px-4 py-3 text-left font-medium">Class</th>
                   <th className="px-4 py-3 text-left font-medium">Curator</th>
-                  <th className="px-4 py-3 text-left font-medium">Time</th>
-                  <th className="px-4 py-3 text-left font-medium">Status</th>
+                  <th className="px-4 py-3 text-left font-medium">Missed Lessons</th>
                   <th className="px-4 py-3 text-left font-medium">Date</th>
                 </tr>
               </thead>
@@ -440,58 +461,22 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3">{records[0].studentInfo?.curator}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center text-sm">
-                            <Clock className="mr-1 h-3 w-3" />
-                            {records[0].attendance_info && 
-                             records[0].attendance_info.length > 0 && 
-                             visibleLessonIndices[name] !== undefined ? 
-                             records[0].attendance_info[visibleLessonIndices[name]].time : 
-                             'N/A'}
-                          </div>
-                          {records[0].attendance_info && records[0].attendance_info.length > 1 && (
-                            <div className="flex items-center gap-1">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-6 w-6 p-0"
-                                onClick={() => navigateAttendance(name, 'prev', records[0].attendance_info.length - 1)}
-                                disabled={visibleLessonIndices[name] === 0}
-                              >
-                                <span className="sr-only">Previous</span>
-                                &lt;
-                              </Button>
-                              
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-6 w-6 p-0"
-                                onClick={() => navigateAttendance(name, 'next', records[0].attendance_info.length - 1)}
-                                disabled={visibleLessonIndices[name] === records[0].attendance_info.length - 1}
-                              >
-                                <span className="sr-only">Next</span>
-                                &gt;
-                              </Button>
-                              <span className="text-xs text-muted-foreground">
-                                {visibleLessonIndices[name] + 1}/{records[0].attendance_info.length}
-                              </span>
+                        {records[0].attendance_info && records[0].attendance_info.length > 0 ? 
+                          records[0].attendance_info.map((info, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                              <div className="flex items-center text-sm">
+                                <Clock className="mr-1 h-3 w-3" />
+                                {info.time}
+                              </div>
+                              <Badge variant="destructive">
+                                Lesson {info.class}
+                              </Badge>
                             </div>
-                          )}
-                        </div>
+                          )) : (
+                            <div className="text-sm text-muted-foreground">No missed lessons</div>
+                          )
+                        }
                       </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      {records[0].attendance_info && 
-                       records[0].attendance_info.length > 0 && 
-                       visibleLessonIndices[name] !== undefined ? 
-                        <Badge variant={
-                          records[0].attendance_info[visibleLessonIndices[name]].status === "after school" 
-                            ? "secondary" 
-                            : "destructive"
-                        }>
-                          {records[0].attendance_info[visibleLessonIndices[name]].status}
-                        </Badge> : 
-                        'N/A'}
                     </td>
                     <td className="px-4 py-3">{formatDate(records[0].date)}</td>
                   </tr>

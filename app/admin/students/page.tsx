@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { MainLayout } from "@/components/layout/main-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,88 @@ import { MascotIcon } from "@/components/ui/mascot-icon"
 import { AddStudentDialog } from "@/components/admin/add-student-dialog"
 import { useToast } from "@/components/ui/use-toast"
 import * as XLSX from 'xlsx'
+import axiosInstance from "@/utils/instance"
+
+interface StudentInfo {
+  id: string
+  name: string
+  class: string
+  curator: string
+}
+
+// Define Student interface
+interface Student {
+  id: string
+  name: string
+  email: string
+  class: string
+  status: string
+  points: number
+  streak: number
+  attendanceRate: string
+  lastAttendance?: string
+}
+
+interface AttendanceRecord {
+  name: string
+  time: string
+  date: string
+  studentInfo?: StudentInfo
+  lateLessons?: string[]
+}
+
+interface AttendanceInfo {
+  time: string
+  class: number
+  status: string
+}
+
+interface NewAttendanceRecord {
+  name: string
+  date: string
+  times: string[]
+  attendance_info: AttendanceInfo[]
+  studentInfo?: StudentInfo
+}
+
+interface AttendanceResponse {
+  status: string
+  attendance_data: NewAttendanceRecord[]
+}
+
+interface StudentsResponse {
+  status: string
+  students: StudentInfo[]
+}
+
+// Lesson schedule
+const LESSON_SCHEDULE = [
+  { start: "8:20", end: "9:00", number: 1 },
+  { start: "9:10", end: "9:50", number: 2 },
+  { start: "10:00", end: "10:40", number: 3 },
+  { start: "10:50", end: "11:30", number: 4 },
+  { start: "11:40", end: "12:20", number: 5 },
+  { start: "12:30", end: "13:10", number: 6 },
+  { start: "13:20", end: "14:00", number: 7 },
+  { start: "14:10", end: "23:59", number: 8 }
+]
+
+const getLateLessons = (time: string): string[] => {
+  const [hours, minutes] = time.split(":").map(Number)
+  const arrivalTime = hours * 60 + minutes
+  const lateLessons: string[] = []
+
+  LESSON_SCHEDULE.forEach(lesson => {
+    const [startHours, startMinutes] = lesson.start.split(":").map(Number)
+    const lessonStartTime = startHours * 60 + startMinutes
+
+    if (arrivalTime > lessonStartTime) {
+      lateLessons.push(lesson.number.toString())
+    }
+  })
+
+  return lateLessons
+}
 
 const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return "No attendance"
@@ -31,6 +113,7 @@ export default function StudentsPage() {
   const [selectedClass, setSelectedClass] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [isLoading, setIsLoading] = useState(false)
+  const [attendanceData, setAttendanceData] = useState<Record<string, AttendanceRecord[]>>({})
   const { toast } = useToast()
 
   // Mock user data
@@ -61,8 +144,62 @@ export default function StudentsPage() {
       name: "Габитов Абдулазиз",
       class: "11H",
       curator: "Самал Талгаткызы"
+    },
+    "MAKSIM": {
+      id: "071305556238",
+      name: "Коссов Максим",
+      class: "11H",
+      curator: "Самал Талгаткызы"
     }
   }
+
+  // Mock students data
+  const students: Student[] = [
+    {
+      id: "071004553794",
+      name: "Бердышев Керей",
+      email: "kerey@school.edu",
+      class: "11H",
+      status: "Active",
+      points: 450,
+      streak: 5,
+      attendanceRate: "98%",
+      lastAttendance: "2025-04-05"
+    },
+    {
+      id: "070708551158",
+      name: "Мажитов Джафар",
+      email: "jafar@school.edu",
+      class: "11D",
+      status: "Active",
+      points: 380,
+      streak: 3,
+      attendanceRate: "95%",
+      lastAttendance: "2025-04-05"
+    },
+    {
+      id: "080424552629",
+      name: "Габитов Абдулазиз",
+      email: "aziz@school.edu",
+      class: "11H",
+      status: "Active",
+      points: 410,
+      streak: 4,
+      attendanceRate: "97%",
+      lastAttendance: "2025-04-05"
+    },
+    {
+      id: "071305556238",
+      name: "Коссов Максим",
+      email: "maksim@school.edu",
+      class: "11H",
+      status: "Active",
+      points: 390,
+      streak: 2,
+      attendanceRate: "94%",
+      lastAttendance: "2025-04-05"
+    }
+  ]
 
   useEffect(() => {
     const fetchAttendanceData = async () => {
@@ -74,20 +211,27 @@ export default function StudentsPage() {
 
         if (response.data.status === "success") {
           // Group records by student name
-          const groupedRecords = response.data.attendance_data.reduce((acc: Record<string, AttendanceRecord[]>, record) => {
+          const groupedRecords: Record<string, AttendanceRecord[]> = {}
+          
+          response.data.attendance_data.forEach(record => {
             const studentInfo = studentInfoDict[record.name]
             if (studentInfo) {
-              if (!acc[record.name]) {
-                acc[record.name] = []
+              if (!groupedRecords[record.name]) {
+                groupedRecords[record.name] = []
               }
-              acc[record.name].push({
-                ...record,
-                studentInfo,
-                lateLessons: getLateLessons(record.time)
-              })
+              
+              // Convert new format to old format for compatibility
+              record.attendance_info.forEach(info => {
+                groupedRecords[record.name].push({
+                  name: record.name,
+                  time: info.time,
+                  date: record.date,
+                  studentInfo,
+                  lateLessons: getLateLessons(info.time)
+                });
+              });
             }
-            return acc
-          }, {})
+          })
 
           // Sort records by time within each group
           Object.keys(groupedRecords).forEach(name => {
@@ -168,20 +312,14 @@ export default function StudentsPage() {
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', `students_report_${new Date().toISOString().split('T')[0]}.xlsx`)
+      link.setAttribute('download', `Students Report.xlsx`)
       document.body.appendChild(link)
       link.click()
-      link.remove()
-
-      toast({
-        title: "Report Downloaded",
-        description: "Students report has been downloaded successfully",
-        variant: "default",
-      })
+      document.body.removeChild(link)
     } catch (error) {
       toast({
-        title: "Download Failed",
-        description: "Failed to download the students report",
+        title: "Error",
+        description: "Failed to download report",
         variant: "destructive",
       })
     } finally {
@@ -229,8 +367,8 @@ export default function StudentsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Classes</SelectItem>
-                <SelectItem value="12A">Class 12A</SelectItem>
-                <SelectItem value="12B">Class 12B</SelectItem>
+                <SelectItem value="11H">11H</SelectItem>
+                <SelectItem value="11D">11D</SelectItem>
               </SelectContent>
             </Select>
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
@@ -274,9 +412,7 @@ export default function StudentsPage() {
                   <th className="px-4 py-3 text-left font-medium">ID</th>
                   <th className="px-4 py-3 text-left font-medium">Name</th>
                   <th className="px-4 py-3 text-left font-medium">Email</th>
-                  <th className="px-4 py-3 text-left font-medium">Class</th>
                   <th className="px-4 py-3 text-left font-medium">Status</th>
-                  <th className="px-4 py-3 text-left font-medium">Points</th>
                   <th className="px-4 py-3 text-left font-medium">Streak</th>
                   <th className="px-4 py-3 text-left font-medium">Attendance</th>
                   <th className="px-4 py-3 text-left font-medium">Last Attendance</th>
@@ -303,10 +439,6 @@ export default function StudentsPage() {
                     </td>
                     <td className="px-4 py-3">{student.email}</td>
                     <td className="px-4 py-3">{student.class}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant={student.status === "Active" ? "outline" : "secondary"}>{student.status}</Badge>
-                    </td>
-                    <td className="px-4 py-3">{student.points} XP</td>
                     <td className="px-4 py-3">{student.streak} days</td>
                     <td className="px-4 py-3">{student.attendanceRate}</td>
                     <td className="px-4 py-3">{formatDate(student.lastAttendance)}</td>
@@ -332,4 +464,3 @@ export default function StudentsPage() {
     </MainLayout>
   )
 }
-
