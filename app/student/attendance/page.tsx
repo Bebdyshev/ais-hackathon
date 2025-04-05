@@ -39,7 +39,7 @@ export default function AttendancePage() {
   }
 
   // Mock attendance data
-  type AttendanceStatus = "present" | "late" | "absent"
+  type AttendanceStatus = "present" | "late" | "absent" | "frozen"
   
   interface DayAttendance {
     status: AttendanceStatus
@@ -68,10 +68,10 @@ export default function AttendancePage() {
         data[i] = { status: "present", time: "8:00 AM" }
       }
       
-      // Only mark day 3 as late if it's not a weekend
+      // Mark day 3 as frozen
       const day3OfWeek = new Date(year, month, 3).getDay()
       if (day3OfWeek !== 0 && day3OfWeek !== 6) {
-        data[3] = { status: "present", time: "8:25 AM" }
+        data[3] = { status: "frozen", time: "8:10 AM" }
       }
     }
 
@@ -108,12 +108,14 @@ export default function AttendancePage() {
         if (dayOfWeek === 0 || dayOfWeek === 6) continue // Skip weekends
         
         const random = Math.random()
-        if (random < 0.7) {
+        if (random < 0.6) {
           data[i] = { status: "present", time: "8:00 AM" }
-        } else if (random < 0.9) {
+        } else if (random < 0.8) {
           data[i] = { status: "late", time: "8:15 AM" }
-        } else {
+        } else if (random < 0.9) {
           data[i] = { status: "absent", time: "-" }
+        } else {
+          data[i] = { status: "frozen", time: "8:00 AM" }
         }
       }
     }
@@ -153,6 +155,8 @@ export default function AttendancePage() {
         return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
       case "absent":
         return "bg-red-100 text-red-800 hover:bg-red-200"
+      case "frozen":
+        return "bg-blue-100 text-blue-800 hover:bg-blue-200"
       default:
         return ""
     }
@@ -161,7 +165,7 @@ export default function AttendancePage() {
   // Mock attendance records
   const attendanceRecords = [
     { date: "Apr 4, 2025", time: "8:02 AM", status: "On Time" as const },
-    { date: "Apr 3, 2025", time: "8:10 AM", status: "On Time" as const },
+    { date: "Apr 3, 2025", time: "8:10 AM", status: "Frozen" as const },
     { date: "Apr 2, 2025", time: "7:55 AM", status: "On Time" as const },
     { date: "Apr 1, 2025", time: "7:58 AM", status: "On Time" as const },
     { date: "Mar 31, 2025", time: "7:59 AM", status: "On Time" as const },
@@ -240,7 +244,7 @@ export default function AttendancePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-4">
               <div className="flex items-center gap-2">
                 <div className="h-4 w-4 rounded-full bg-green-500"></div>
                 <span>Present</span>
@@ -252,6 +256,10 @@ export default function AttendancePage() {
               <div className="flex items-center gap-2">
                 <div className="h-4 w-4 rounded-full bg-red-500"></div>
                 <span>Absent</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded-full bg-blue-500"></div>
+                <span>Frozen</span>
               </div>
             </div>
           </CardContent>

@@ -4,10 +4,21 @@ import { Clock } from "lucide-react"
 interface AttendanceRecordProps {
   date: string
   time: string
-  status: "On Time" | "Late" | "Absent"
+  status: "On Time" | "Late" | "Absent" | "Frozen"
 }
 
 export function AttendanceRecord({ date, time, status }: AttendanceRecordProps) {
+  // Helper function to get badge variant based on status
+  const getBadgeVariant = () => {
+    switch(status) {
+      case "On Time": return "outline"
+      case "Late": return "secondary"
+      case "Absent": return "destructive"
+      case "Frozen": return "default" // Blue badge for frozen
+      default: return "outline"
+    }
+  }
+  
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -17,7 +28,10 @@ export function AttendanceRecord({ date, time, status }: AttendanceRecordProps) 
           {time}
         </div>
       </div>
-      <Badge variant={status === "On Time" ? "outline" : status === "Late" ? "secondary" : "destructive"}>
+      <Badge 
+        variant={getBadgeVariant()}
+        className={status === "Frozen" ? "bg-blue-100 text-blue-800 hover:bg-blue-200 hover:text-blue-900" : ""}
+      >
         {status}
       </Badge>
     </div>
