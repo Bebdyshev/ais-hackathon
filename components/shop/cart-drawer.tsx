@@ -5,7 +5,7 @@ import Image from "next/image"
 import { X, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { MascotIcon } from "@/components/ui/mascot-icon"
-import type { CartItem } from "@/components/shop/types"
+import type { CartItem } from "@/components/shop/type"
 
 interface CartDrawerProps {
   cart: CartItem[]

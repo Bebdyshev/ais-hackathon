@@ -3,9 +3,10 @@ export interface Product {
   name: string
   description: string
   price: number
-  image: string
+  image?: string
   category: string
   available: boolean
+  points: number
 }
 
 export interface CartItem extends Product {
@@ -24,6 +25,7 @@ export const cafeteriaProducts: Product[] = [
       "https://www.coca-cola.com/content/dam/onexp/kz/ru/home-images/brands/brand-fusetea/desktop/fusetea-mango-pineapple_d.jpg",
     category: "drinks",
     available: true,
+    points: 100,
   },
   {
     id: "p2",
@@ -34,6 +36,7 @@ export const cafeteriaProducts: Product[] = [
       "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     category: "drinks",
     available: true,
+    points: 100,
   },
   {
     id: "p3",
@@ -44,6 +47,7 @@ export const cafeteriaProducts: Product[] = [
       "https://img.oe.kz/bitrix-catalog/40526/1720313212-lzoal0g4tjmzrzmthj38onn31jju286t.jpg",
     category: "drinks",
     available: true,
+    points: 100,
   },
   {
     id: "p4",
@@ -54,6 +58,7 @@ export const cafeteriaProducts: Product[] = [
       "https://img.iamcook.ru/2021/upl/recipes/zen/u-906279da5f39acc8d9c27f6fa8295bd4.JPG",
     category: "food",
     available: true,
+    points: 100,
   },
   {
     id: "p5",
@@ -64,6 +69,7 @@ export const cafeteriaProducts: Product[] = [
       "https://vkusmart.vmv.kz/upload/iblock/53b/1mbip5vl64ybld6nb1of6r4j35cu7vtn.png",
     category: "drinks",
     available: true,
+    points: 100,
   },
   {
     id: "p6",
@@ -73,7 +79,8 @@ export const cafeteriaProducts: Product[] = [
     image:
       "https://cc.kz/upload/iblock/2d0/2d044714b087eb597bf6a0a9545e7fff.jpg",
     category: "snacks",
-    available: true,
+    available: true,  
+    points: 100,
   },
   {
     id: "p7",
@@ -84,6 +91,7 @@ export const cafeteriaProducts: Product[] = [
       "https://static.insales-cdn.com/images/products/1/526/301998606/%D0%91%D0%B0%D1%82%D0%BE%D0%BD%D1%87%D0%B8%D0%BA_%D1%88%D0%BE%D0%BA%D0%BE%D0%BB%D0%B0%D0%B4%D0%BD%D1%8B%D0%B9_BOUNTY_%D0%A2%D1%80%D0%B8%D0%BE_82_5_%D0%B3.jpg",
     category: "snacks",
     available: true,
+    points: 100,
   },
   {
     id: "p9",
@@ -94,6 +102,7 @@ export const cafeteriaProducts: Product[] = [
       "https://cc.kz/upload/iblock/11e/11e6e2c82bbf0be986caf712cd13a8f9.jpg",
     category: "snacks",
     available: true,
+    points: 100,
   },
   {
     id: "c1",
@@ -102,8 +111,9 @@ export const cafeteriaProducts: Product[] = [
     price: 50,
     image:
       "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    category: "drinks",
+    category: "drinks", 
     available: true,
+    points: 100,
   },
   {
     id: "c2",
@@ -113,7 +123,8 @@ export const cafeteriaProducts: Product[] = [
     image:
       "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     category: "drinks",
-    available: true,
+    available: true,  
+    points: 100,
   },
   {
     id: "c3",
@@ -123,6 +134,7 @@ export const cafeteriaProducts: Product[] = [
     image: "https://www.acouplecooks.com/wp-content/uploads/2020/11/Chia-Seed-Smoothie-004.jpg",
     category: "drinks",
     available: true,
+    points: 100,
   },
   {
     id: "c4",
@@ -133,6 +145,7 @@ export const cafeteriaProducts: Product[] = [
       "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     category: "food",
     available: true,
+    points: 100,
   },
   {
     id: "c5",
@@ -143,6 +156,7 @@ export const cafeteriaProducts: Product[] = [
       "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     category: "food",
     available: true,
+    points: 100,
   },
   {
     id: "c6",
@@ -153,6 +167,7 @@ export const cafeteriaProducts: Product[] = [
       "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     category: "food",
     available: true,
+    points: 100,
   },
   {
     id: "c7",
@@ -163,6 +178,7 @@ export const cafeteriaProducts: Product[] = [
       "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     category: "snacks",
     available: true,
+    points: 100,
   },
   {
     id: "c8",
@@ -172,7 +188,8 @@ export const cafeteriaProducts: Product[] = [
     image:
       "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     category: "snacks",
-    available: true,
+    available: true,  
+    points: 100,
   },
   {
     id: "c9",
@@ -183,6 +200,7 @@ export const cafeteriaProducts: Product[] = [
       "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     category: "snacks",
     available: true,
+    points: 100,
   },
   {
     id: "c10",
@@ -192,7 +210,8 @@ export const cafeteriaProducts: Product[] = [
     image:
       "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     category: "snacks",
-    available: true,
+    available: true,    
+    points: 100,
   },
   {
     id: "c11",
@@ -203,6 +222,7 @@ export const cafeteriaProducts: Product[] = [
       "https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     category: "snacks",
     available: true,
+    points: 100,
   },
   {
     id: "c12",
@@ -213,6 +233,6 @@ export const cafeteriaProducts: Product[] = [
       "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     category: "food",
     available: true,
+    points: 100,
   },
 ]
-

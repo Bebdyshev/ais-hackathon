@@ -69,6 +69,7 @@ export default function MinimalShop({ points, onPointsChange }: MinimalShopProps
               setSelectedProduct(null)
               setIsCartOpen(true)
             }}
+            userPoints={points}
           />
         )}
       </AnimatePresence>

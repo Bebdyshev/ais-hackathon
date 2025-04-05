@@ -67,7 +67,12 @@ export function ShopItem({ item, userPoints, onPurchase }: ShopItemProps) {
     <>
       <Card className={`overflow-hidden transition-all hover:shadow-md ${!item.available ? "opacity-70" : ""}`}>
         <div className="relative h-48 w-full">
-          <Image src={item.image} alt={item.name} fill className="object-cover" />
+          <Image 
+            src={item.image || "/placeholder.svg"}
+            alt={item.name}
+            fill
+            className="object-cover"
+          />
           <Badge className="absolute right-2 top-2" variant={item.available ? "secondary" : "outline"}>
             {item.points} points
           </Badge>
