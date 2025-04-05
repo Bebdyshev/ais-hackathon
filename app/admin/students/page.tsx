@@ -15,7 +15,8 @@ import { AddStudentDialog } from "@/components/admin/add-student-dialog"
 import { useToast } from "@/components/ui/use-toast"
 import * as XLSX from 'xlsx'
 
-const formatDate = (dateString: string): string => {
+const formatDate = (dateString: string | undefined): string => {
+  if (!dateString) return "No attendance"
   const date = new Date(dateString)
   const options: Intl.DateTimeFormatOptions = {
     month: 'long',
@@ -51,6 +52,7 @@ export default function StudentsPage() {
       points: 350,
       streak: 5,
       attendanceRate: "95.9%",
+      lastAttendance: "2025-04-05"
     },
     {
       id: "S12346",
@@ -61,6 +63,7 @@ export default function StudentsPage() {
       points: 280,
       streak: 3,
       attendanceRate: "92.3%",
+      lastAttendance: "2025-04-05"
     },
     {
       id: "S12347",
@@ -147,7 +150,8 @@ export default function StudentsPage() {
           'Status': student.status,
           'Points': student.points,
           'Streak': student.streak,
-          'Attendance Rate': student.attendanceRate
+          'Attendance Rate': student.attendanceRate,
+          'Last Attendance': formatDate(student.lastAttendance)
         }))
       )
 
@@ -160,7 +164,8 @@ export default function StudentsPage() {
         {wch: 10}, // Status
         {wch: 8},  // Points
         {wch: 8},  // Streak
-        {wch: 12}  // Attendance Rate
+        {wch: 12}, // Attendance Rate
+        {wch: 15}  // Last Attendance
       ]
       ws['!cols'] = wscols
 
@@ -203,10 +208,6 @@ export default function StudentsPage() {
         <div>
           <h1 className="text-2xl font-bold">Students</h1>
           <p className="text-muted-foreground">Manage and view all students</p>
-        </div>
-        <div className="flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-secondary-foreground">
-          <MascotIcon className="h-5 w-5" />
-          <span className="text-sm font-medium">Today: {formatDate(new Date().toISOString())}</span>
         </div>
         <AddStudentDialog
           onStudentAdded={(student) => {
@@ -291,6 +292,7 @@ export default function StudentsPage() {
                   <th className="px-4 py-3 text-left font-medium">Points</th>
                   <th className="px-4 py-3 text-left font-medium">Streak</th>
                   <th className="px-4 py-3 text-left font-medium">Attendance</th>
+                  <th className="px-4 py-3 text-left font-medium">Last Attendance</th>
                   <th className="px-4 py-3 text-left font-medium">Actions</th>
                 </tr>
               </thead>
@@ -320,6 +322,7 @@ export default function StudentsPage() {
                     <td className="px-4 py-3">{student.points} XP</td>
                     <td className="px-4 py-3">{student.streak} days</td>
                     <td className="px-4 py-3">{student.attendanceRate}</td>
+                    <td className="px-4 py-3">{formatDate(student.lastAttendance)}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <Link href={`/admin/students/${student.id}`}>
