@@ -12,7 +12,7 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MascotIcon className="h-10 w-10 text-white" />
-              <h1 className="text-2xl font-bold text-white">SmartAttend</h1>
+              <h1 className="text-2xl font-bold text-white">Qatysu</h1>
             </div>
             <div className="flex items-center gap-4">
               <Link href="/login">

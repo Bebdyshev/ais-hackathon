@@ -43,7 +43,7 @@ export function MainLayout({ children, user }: MainLayoutProps) {
       icon: Trophy,
     },
     {
-      title: "Roadmap",
+      title: "AI Assistant",
       href: "https://aishack-ai.vercel.app/",
       icon: Map,
     },
@@ -98,7 +98,7 @@ export function MainLayout({ children, user }: MainLayoutProps) {
                 <div className="flex h-16 items-center border-b px-4">
                   <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileNavOpen(false)}>
                     <MascotIcon className="h-8 w-8" />
-                    <span className="text-xl font-bold">SmartAttend</span>
+                    <span className="text-xl font-bold">Qatysu</span>
                   </Link>
                 </div>
                 <SidebarNav
@@ -109,7 +109,7 @@ export function MainLayout({ children, user }: MainLayoutProps) {
             </Sheet>
             <Link href="/" className="flex items-center gap-2">
               <MascotIcon className="h-8 w-8" />
-              <span className="text-xl font-bold">SmartAttend</span>
+              <span className="text-xl font-bold">Qatysu</span>
             </Link>
             {isAdmin && (
               <Badge variant="outline" className="bg-secondary text-secondary-foreground">
