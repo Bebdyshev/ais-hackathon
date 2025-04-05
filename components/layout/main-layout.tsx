@@ -2,7 +2,7 @@
 
 import { type ReactNode, useState } from "react"
 import Link from "next/link"
-import { Bell, Home, Menu, User, Users, QrCode, BarChart3, Settings, GraduationCap, Trophy, Map, UserCircle } from "lucide-react"
+import { Bell, Home, Menu, User, Users, QrCode, BarChart3, Settings, GraduationCap, Trophy, Map, UserCircle, ShoppingBasket } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -41,6 +41,11 @@ export function MainLayout({ children, user }: MainLayoutProps) {
       title: "Achievements",
       href: "/student/achievements",
       icon: Trophy,
+    },
+    {
+      title: "Shop",
+      href: "/student/shop",
+      icon: ShoppingBasket,
     },
     {
       title: "AI Assistant",

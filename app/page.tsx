@@ -28,7 +28,7 @@ export default function Home() {
             <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-primary">
               <MascotIcon className="h-16 w-16 text-white" />
             </div>
-            <h2 className="mb-6 text-4xl font-bold tracking-tight">Smart Attendance System</h2>
+            <h2 className="mb-6 text-4xl font-bold tracking-tight">Qatysu</h2>
             <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground">
               Make attendance fun with gamification, streaks, and achievements
             </p>
@@ -165,10 +165,10 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2">
             <MascotIcon className="h-8 w-8" />
-            <span className="text-xl font-bold">SmartAttend</span>
+            <span className="text-xl font-bold">Qatysu</span>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} SmartAttend. All rights reserved.
+            &copy; {new Date().getFullYear()} Qatysu. All rights reserved.
           </p>
         </div>
       </footer>

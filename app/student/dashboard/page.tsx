@@ -89,10 +89,10 @@ export default function StudentDashboard() {
             </div>
             <Progress value={progress} className="h-4 rounded-full bg-gray-100" />
             <div className="mt-4 flex justify-end">
-              <Link href="/student/roadmap">
+              <Link href="https://aishack-ai.vercel.app/">
                 <Button variant="outline" size="sm" className="gap-2">
                   <Calendar className="h-4 w-4" />
-                  View Full Roadmap
+                  Get AI assistants
                 </Button>
               </Link>
             </div>
