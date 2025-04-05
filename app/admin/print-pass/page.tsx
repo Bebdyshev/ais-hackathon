@@ -14,7 +14,7 @@ export default function PrintPassPage() {
 
   // Mock user data
   const user = {
-    name: "Admin User",
+    name: "Mazhitov Jafar",
     email: "admin@admin.school.edu",
     role: "admin" as const,
     avatar: "/placeholder.svg?height=40&width=40",
@@ -23,7 +23,7 @@ export default function PrintPassPage() {
   // Mock student data
   const studentData = {
     id: "S12345",
-    name: "John Doe",
+    name: "Mazhitov Jafar",
     class: "12A",
     date: "April 5, 2025",
     time: "8:32 AM",

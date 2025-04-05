@@ -16,7 +16,7 @@ export default function ReportsPage() {
 
   // Mock user data
   const user = {
-    name: "Admin User",
+    name: "Mazhitov Jafar",
     email: "admin@admin.school.edu",
     role: "admin" as const,
     avatar: "/placeholder.svg?height=40&width=40",

@@ -20,7 +20,7 @@ export default function AdminDashboard() {
 
   // Mock user data
   const user = {
-    name: "Admin User",
+    name: "Mazhitov Jafar",
     email: "admin@admin.school.edu",
     role: "admin" as const,
     avatar: "/",

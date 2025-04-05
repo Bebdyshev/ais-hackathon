@@ -16,7 +16,7 @@ export default function StudentDetailPage() {
 
   // Mock user data
   const user = {
-    name: "Admin User",
+    name: "Mazhitov Jafar",
     email: "admin@admin.school.edu",
     role: "admin" as const,
     avatar: "/placeholder.svg?height=40&width=40",
@@ -29,7 +29,7 @@ export default function StudentDetailPage() {
     email: "john.doe@student.edu",
     class: "12A",
     status: "Active",
-    avatar: "/placeholder.svg?height=96&width=96",
+    avatar: "/",
     level: 3,
     progress: 65,
     points: 350,
