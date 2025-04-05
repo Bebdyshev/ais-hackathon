@@ -93,7 +93,7 @@ export default function StudentDashboard() {
               <Link href="https://aishack-ai.vercel.app/">
                 <Button variant="outline" size="sm" className="gap-2">
                   <Calendar className="h-4 w-4" />
-                  Get AI assistants
+                  Get AI assistance
                 </Button>
               </Link>
             </div>

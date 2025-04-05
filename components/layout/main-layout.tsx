@@ -49,7 +49,7 @@ export function MainLayout({ children, user }: MainLayoutProps) {
     },
     {
       title: "AI Assistant",
-      href: "https://aishack-ai.vercel.app/",
+      href: "/student/ai",
       icon: Map,
     },
     {

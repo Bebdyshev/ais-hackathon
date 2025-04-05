@@ -6,7 +6,7 @@ import { PointsProvider } from '@/context/points-context'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Student Attendance System',
+  title: 'Qatysu',
   description: 'Track and manage student attendance with ease',
 }
 
