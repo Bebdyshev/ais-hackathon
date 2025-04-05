@@ -45,7 +45,7 @@ const Hero: FC<THeroProps> = ({
           promptValue={promptValue}
           setPromptValue={setPromptValue}
           handleDisplayResult={handleDisplayResult}
-          buttonClassName="bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 transition-colors"
+          buttonClassName="bg-primary"
         />
       </div>
 
