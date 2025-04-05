@@ -16,6 +16,86 @@ export type ShopItemType = Product
 
 export const cafeteriaProducts: Product[] = [
   {
+    id: "p1",
+    name: "Fuse Tea",
+    description: "Refreshing iced tea with mango and pineapple flavor.",
+    price: 89,
+    image:
+      "https://www.coca-cola.com/content/dam/onexp/kz/ru/home-images/brands/brand-fusetea/desktop/fusetea-mango-pineapple_d.jpg",
+    category: "drinks",
+    available: true,
+  },
+  {
+    id: "p2",
+    name: "Capuccino Coffee",
+    description: "Rich and creamy cappuccino made with premium coffee beans.",
+    price: 65,
+    image:
+      "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    category: "drinks",
+    available: true,
+  },
+  {
+    id: "p3",
+    name: "Asu Water",
+    description: "Natural mineral water from the mountains.",
+    price: 45,
+    image:
+      "https://img.oe.kz/bitrix-catalog/40526/1720313212-lzoal0g4tjmzrzmthj38onn31jju286t.jpg",
+    category: "drinks",
+    available: true,
+  },
+  {
+    id: "p4",
+    name: "Samsa",
+    description: "Traditional baked pastry with meat filling.",
+    price: 79,
+    image:
+      "https://img.iamcook.ru/2021/upl/recipes/zen/u-906279da5f39acc8d9c27f6fa8295bd4.JPG",
+    category: "food",
+    available: true,
+  },
+  {
+    id: "p5",
+    name: "Напиток Му FOOD MASTER",
+    description: "Traditional fermented dairy drink.",
+    price: 34,
+    image:
+      "https://vkusmart.vmv.kz/upload/iblock/53b/1mbip5vl64ybld6nb1of6r4j35cu7vtn.png",
+    category: "drinks",
+    available: true,
+  },
+  {
+    id: "p6",
+    name: "Albeni Ulker",
+    description: "Delicious chocolate cake with cream filling.",
+    price: 55,
+    image:
+      "https://cc.kz/upload/iblock/2d0/2d044714b087eb597bf6a0a9545e7fff.jpg",
+    category: "snacks",
+    available: true,
+  },
+  {
+    id: "p7",
+    name: "Bounty Trio",
+    description: "Coconut and chocolate candy bar.",
+    price: 42,
+    image:
+      "https://static.insales-cdn.com/images/products/1/526/301998606/%D0%91%D0%B0%D1%82%D0%BE%D0%BD%D1%87%D0%B8%D0%BA_%D1%88%D0%BE%D0%BA%D0%BE%D0%BB%D0%B0%D0%B4%D0%BD%D1%8B%D0%B9_BOUNTY_%D0%A2%D1%80%D0%B8%D0%BE_82_5_%D0%B3.jpg",
+    category: "snacks",
+    available: true,
+  },
+  {
+    id: "p9",
+    name: "Snickers",
+    description: "Chocolate bar with peanuts, caramel, and nougat.",
+    price: 38,
+    image:
+      "https://cc.kz/upload/iblock/11e/11e6e2c82bbf0be986caf712cd13a8f9.jpg",
+    category: "snacks",
+    available: true,
+  },
+  {
     id: "c1",
     name: "Coffee",
     description: "Hot coffee to keep you energized throughout the day.",
