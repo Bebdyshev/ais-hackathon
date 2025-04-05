@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -19,6 +19,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const userRole = localStorage.getItem('userRole')
+    const userEmail = localStorage.getItem('userEmail')
+    
+    if (userRole && userEmail) {
+      // Redirect based on role
+      if (userRole === 'admin') {
+        router.push('/admin/dashboard')
+      } else if (userRole === 'student') {
+        router.push('/student/dashboard')
+      }
+    }
+  }, [router])
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -34,11 +49,27 @@ export default function LoginPage() {
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
+      let userRole = ''
+
       if (email.endsWith("@admin.school.edu")) {
         // Admin login
+        userRole = 'admin'
+        
+        // Save to localStorage
+        localStorage.setItem('userRole', userRole)
+        localStorage.setItem('userEmail', email)
+        localStorage.setItem('userName', email.split('@')[0])
+        
         router.push("/admin/dashboard")
       } else if (email.endsWith("@student.edu")) {
         // Student login
+        userRole = 'student'
+        
+        // Save to localStorage
+        localStorage.setItem('userRole', userRole)
+        localStorage.setItem('userEmail', email)
+        localStorage.setItem('userName', email.split('@')[0])
+        
         router.push("/student/dashboard")
       } else {
         // Invalid email domain
