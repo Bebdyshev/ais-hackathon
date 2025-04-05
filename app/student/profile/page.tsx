@@ -15,7 +15,7 @@ export default function ProfilePage() {
     name: "John Doe",
     email: "john.doe@student.edu",
     role: "student" as const,
-    avatar: "/placeholder.svg?height=40&width=40",
+    avatar: "/",
   }
 
   // Mock student data

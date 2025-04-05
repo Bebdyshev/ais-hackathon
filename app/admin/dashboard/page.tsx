@@ -23,7 +23,7 @@ export default function AdminDashboard() {
     name: "Admin User",
     email: "admin@admin.school.edu",
     role: "admin" as const,
-    avatar: "/placeholder.svg?height=40&width=40",
+    avatar: "/",
   }
 
   // Mock student data
@@ -160,9 +160,21 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3">{student.id}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8 border-2 border-primary/20">
-                          <AvatarImage src="/placeholder.svg?height=32&width=32" alt={student.name} />
-                          <AvatarFallback className="bg-primary/10 text-primary">
+                        <Avatar className={`h-8 w-8 border-2 ${
+                          student.status === "Present" 
+                            ? "border-primary/20" 
+                            : student.status === "Late"
+                              ? "border-yellow-500/20"
+                              : "border-red-500/20"
+                        }`}>
+                          <AvatarImage src="/" alt={student.name} />
+                          <AvatarFallback className={`${
+                            student.status === "Present"
+                              ? "bg-primary/10 text-primary"
+                              : student.status === "Late"
+                                ? "bg-yellow-500/10 text-yellow-600"
+                                : "bg-red-500/10 text-red-600"
+                          }`}>
                             {student.name
                               .split(" ")
                               .map((n) => n[0])

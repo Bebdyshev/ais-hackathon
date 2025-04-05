@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Search, Filter, Download, Plus } from "lucide-react"
+import { Search, Filter, Download } from "lucide-react"
 import Link from "next/link"
 import { MascotIcon } from "@/components/ui/mascot-icon"
+import { AddStudentDialog } from "@/components/admin/add-student-dialog"
 
 export default function StudentsPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -125,10 +126,13 @@ export default function StudentsPage() {
           <h1 className="text-2xl font-bold">Students</h1>
           <p className="text-muted-foreground">Manage and view all students</p>
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Student
-        </Button>
+        <AddStudentDialog
+          onStudentAdded={(student) => {
+            // In a real app, you would update the students list
+            // For this demo, we'll just show a console log
+            console.log("New student added:", student)
+          }}
+        />
       </div>
 
       <Card className="mb-6 overflow-hidden">
@@ -209,9 +213,9 @@ export default function StudentsPage() {
                     <td className="px-4 py-3">{student.id}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8 border-2 border-primary/20">
-                          <AvatarImage src="/placeholder.svg?height=32&width=32" alt={student.name} />
-                          <AvatarFallback className="bg-primary/10 text-primary">
+                        <Avatar className={`h-8 w-8 border-2 ${student.status === "Active" ? "border-primary/20" : "border-yellow-500/20"}`}>
+                          <AvatarImage src="/" alt={student.name} />
+                          <AvatarFallback className={`${student.status === "Active" ? "bg-primary/10 text-primary" : "bg-yellow-500/10 text-yellow-600"}`}>
                             {student.name
                               .split(" ")
                               .map((n) => n[0])

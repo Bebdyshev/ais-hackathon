@@ -24,7 +24,7 @@ export function StudentProfileCard({ student }: StudentProfileCardProps) {
       <div className="bg-gradient-to-r from-primary to-green-400 p-6 text-white">
         <div className="flex flex-col items-center">
           <Avatar className="mb-4 h-24 w-24 border-4 border-white">
-            <AvatarImage src={student.avatar || "/placeholder.svg?height=96&width=96"} alt={student.name} />
+            <AvatarImage src={student.avatar || "/"} alt={student.name} />
             <AvatarFallback className="bg-white text-2xl text-primary">
               {student.name
                 .split(" ")

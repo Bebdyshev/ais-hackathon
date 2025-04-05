@@ -2,7 +2,7 @@
 
 import { type ReactNode, useState } from "react"
 import Link from "next/link"
-import { Bell, Home, Menu, User } from "lucide-react"
+import { Bell, Home, Menu, User, Users, QrCode, BarChart3, Settings, GraduationCap, Trophy, Map, UserCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -35,22 +35,22 @@ export function MainLayout({ children, user }: MainLayoutProps) {
     {
       title: "Attendance",
       href: "/student/attendance",
-      icon: User,
+      icon: QrCode,
     },
     {
       title: "Achievements",
       href: "/student/achievements",
-      icon: User,
+      icon: Trophy,
     },
     {
       title: "Roadmap",
       href: "/student/roadmap",
-      icon: User,
+      icon: Map,
     },
     {
       title: "Profile",
       href: "/student/profile",
-      icon: User,
+      icon: UserCircle,
     },
   ]
 
@@ -63,22 +63,22 @@ export function MainLayout({ children, user }: MainLayoutProps) {
     {
       title: "Students",
       href: "/admin/students",
-      icon: User,
+      icon: GraduationCap,
     },
     {
       title: "Scanner",
       href: "/admin/scanner",
-      icon: User,
+      icon: QrCode,
     },
     {
       title: "Reports",
       href: "/admin/reports",
-      icon: User,
+      icon: BarChart3,
     },
     {
       title: "Settings",
       href: "/admin/settings",
-      icon: User,
+      icon: Settings,
     },
   ]
 
@@ -126,7 +126,7 @@ export function MainLayout({ children, user }: MainLayoutProps) {
             </Button>
             <div className="flex items-center gap-2">
               <Avatar className="border-2 border-primary">
-                <AvatarImage src={user.avatar || "/placeholder.svg?height=40&width=40"} alt={user.name} />
+                <AvatarImage src={"/"} alt={user.name} />
                 <AvatarFallback className="bg-primary text-white">
                   {user.name
                     .split(" ")

@@ -25,7 +25,7 @@ export default function AttendancePage() {
 
   const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay()
 
-  const monthName = currentMonth.toLocaleString("default", { month: "long" })
+  const monthName = currentMonth.toLocaleString('en', { month: "long" })
   const year = currentMonth.getFullYear()
 
   const previousMonth = () => {
@@ -37,7 +37,14 @@ export default function AttendancePage() {
   }
 
   // Mock attendance data
-  const attendanceData = {
+  type AttendanceStatus = "present" | "late" | "absent"
+  
+  interface DayAttendance {
+    status: AttendanceStatus
+    time: string
+  }
+
+  const attendanceData: Record<number, DayAttendance> = {
     1: { status: "present", time: "7:58 AM" },
     2: { status: "present", time: "8:02 AM" },
     3: { status: "late", time: "8:15 AM" },
