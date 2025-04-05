@@ -160,11 +160,11 @@ export default function AttendancePage() {
 
   // Mock attendance records
   const attendanceRecords = [
-    { date: "Apr 5, 2025", time: "8:05 AM", status: "On Time" as const },
     { date: "Apr 4, 2025", time: "8:02 AM", status: "On Time" as const },
-    { date: "Apr 3, 2025", time: "8:10 AM", status: "Late" as const },
+    { date: "Apr 3, 2025", time: "8:10 AM", status: "On Time" as const },
     { date: "Apr 2, 2025", time: "7:55 AM", status: "On Time" as const },
     { date: "Apr 1, 2025", time: "7:58 AM", status: "On Time" as const },
+    { date: "Mar 31, 2025", time: "7:59 AM", status: "On Time" as const },
   ]
 
   return (
