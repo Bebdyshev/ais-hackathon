@@ -44,7 +44,7 @@ export function MainLayout({ children, user }: MainLayoutProps) {
     },
     {
       title: "Roadmap",
-      href: "/student/roadmap",
+      href: "https://aishack-ai.vercel.app/",
       icon: Map,
     },
     {
