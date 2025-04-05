@@ -1,3 +1,4 @@
+"use client"
 import MinimalShop from "@/components/kokonutui/minimal-shop"
 import { MainLayout } from "@/components/layout/main-layout"
 import { useState } from "react"

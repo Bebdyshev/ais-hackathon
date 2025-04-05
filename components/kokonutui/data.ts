@@ -14,102 +14,74 @@ export interface Product {
   export const products: Product[] = [
     {
       id: "p1",
-      name: "Minimal Desk Lamp",
+      name: "Fuse Tea",
       description: "A sleek and modern desk lamp with adjustable brightness and color temperature.",
       price: 89,
       image:
-        "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      category: "Lighting",
+        "https://www.coca-cola.com/content/dam/onexp/kz/ru/home-images/brands/brand-fusetea/desktop/fusetea-mango-pineapple_d.jpg",
+      category: "",
     },
     {
       id: "p2",
-      name: "Ceramic Coffee Set",
+      name: "Capuccino Coffee",
       description: "Handcrafted ceramic coffee set including 4 cups and a matching pour-over dripper.",
       price: 65,
       image:
         "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      category: "Kitchenware",
+      category: "",
     },
     {
       id: "p3",
-      name: "Linen Throw Pillow",
+      name: "Asu Water",
       description: "Soft linen throw pillow with minimalist pattern design.",
       price: 45,
       image:
-        "https://images.unsplash.com/photo-1579656381226-5fc0f0100c3b?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      category: "Home Decor",
+        "https://img.oe.kz/bitrix-catalog/40526/1720313212-lzoal0g4tjmzrzmthj38onn31jju286t.jpg",
+      category: "",
     },
     {
       id: "p4",
-      name: "Wooden Wall Clock",
+      name: "Samsa",
       description: "Modern wooden wall clock with silent movement.",
       price: 79,
       image:
-        "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      category: "Home Decor",
+        "https://img.iamcook.ru/2021/upl/recipes/zen/u-906279da5f39acc8d9c27f6fa8295bd4.JPG",
+      category: "",
     },
     {
       id: "p5",
-      name: "Concrete Planter",
+      name: "Напиток Му FOOD MASTER",
       description: "Minimalist concrete planter perfect for succulents.",
       price: 34,
       image:
-        "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      category: "Plants",
+        "https://vkusmart.vmv.kz/upload/iblock/53b/1mbip5vl64ybld6nb1of6r4j35cu7vtn.png",
+      category: "",
     },
     {
       id: "p6",
-      name: "Glass Vase Set",
+      name: "Albeni Ulker",
       description: "Set of 3 minimalist glass vases in varying sizes.",
       price: 55,
       image:
-        "https://images.unsplash.com/photo-1581783898377-1c85bf937427?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      category: "Home Decor",
+        "https://cc.kz/upload/iblock/2d0/2d044714b087eb597bf6a0a9545e7fff.jpg",
+      category: "",
     },
     {
       id: "p7",
-      name: "Bamboo Organizer",
+      name: "Bounty Trio",
       description: "Desk organizer made from sustainable bamboo.",
       price: 42,
       image:
-        "https://images.unsplash.com/photo-1591129841117-3adfd313e34f?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      category: "Office",
+        "https://static.insales-cdn.com/images/products/1/526/301998606/%D0%91%D0%B0%D1%82%D0%BE%D0%BD%D1%87%D0%B8%D0%BA_%D1%88%D0%BE%D0%BA%D0%BE%D0%BB%D0%B0%D0%B4%D0%BD%D1%8B%D0%B9_BOUNTY_%D0%A2%D1%80%D0%B8%D0%BE_82_5_%D0%B3.jpg",
+      category: "",
     },
     {
       id: "p9",
-      name: "Marble Coasters",
+      name: "Snickers",
       description: "Set of 4 marble coasters with cork backing.",
       price: 38,
       image:
-        "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      category: "Kitchenware",
-    },
-    {
-      id: "p10",
-      name: "Brass Bookends",
-      description: "Modern geometric brass bookends, set of 2.",
-      price: 68,
-      image: "https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      category: "Office",
-    },
-    {
-      id: "p11",
-      name: "Ceramic Plant Pot",
-      description: "Handmade ceramic plant pot with drainage hole.",
-      price: 48,
-      image:
-        "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      category: "Plants",
-    },
-    {
-      id: "p12",
-      name: "Wall Mirror",
-      description: "Round wall mirror with minimal metal frame.",
-      price: 120,
-      image:
-        "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      category: "Home Decor",
+        "https://cc.kz/upload/iblock/11e/11e6e2c82bbf0be986caf712cd13a8f9.jpg",
+      category: "",
     },
   ]
-  
-  
