@@ -8,9 +8,10 @@ interface TopBarProps {
   cartItemCount: number
   onCartClick: () => void
   onSearch: (query: string) => void
+  points: number
 }
 
-export function TopBar({ cartItemCount, onCartClick, onSearch }: TopBarProps) {
+export function TopBar({ cartItemCount, onCartClick, onSearch, points }: TopBarProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
