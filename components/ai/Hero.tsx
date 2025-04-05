@@ -36,7 +36,7 @@ const Hero: FC<THeroProps> = ({
         </span>
       </a>
       <h2 className="bg-custom-gradient bg-clip-text pb-7 pt-2 text-center text-3xl font-semibold leading-[normal] lg:text-[64px]">
-        Search smarter & faster
+        Get to school on time
       </h2>
 
       {/* input section */}
