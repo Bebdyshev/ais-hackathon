@@ -31,9 +31,23 @@ interface AttendanceRecord {
   lateLessons?: string[]
 }
 
+interface AttendanceInfo {
+  time: string
+  class: number
+  status: string
+}
+
+interface NewAttendanceRecord {
+  name: string
+  date: string
+  times: string[]
+  attendance_info: AttendanceInfo[]
+  studentInfo?: StudentInfo
+}
+
 interface AttendanceResponse {
   status: string
-  attendance_data: AttendanceRecord[]
+  attendance_data: NewAttendanceRecord[]
 }
 
 interface StudentsResponse {
@@ -84,7 +98,7 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedClass, setSelectedClass] = useState("all")
   const [isLoading, setIsLoading] = useState(false)
-  const [attendanceData, setAttendanceData] = useState<Record<string, AttendanceRecord[]>>({})
+  const [attendanceData, setAttendanceData] = useState<Record<string, NewAttendanceRecord[]>>({})
   const [visibleLessonIndices, setVisibleLessonIndices] = useState<Record<string, number>>({})
   const { toast } = useToast()
 
@@ -127,29 +141,20 @@ export default function AdminDashboard() {
         })
 
         if (response.data.status === "success") {
-          // Group records by student name
-          const groupedRecords = response.data.attendance_data.reduce((acc: Record<string, AttendanceRecord[]>, record) => {
+          // Process the new format data
+          const groupedRecords: Record<string, NewAttendanceRecord[]> = {}
+          
+          response.data.attendance_data.forEach(record => {
             const studentInfo = studentInfoDict[record.name]
             if (studentInfo) {
-              if (!acc[record.name]) {
-                acc[record.name] = []
+              if (!groupedRecords[record.name]) {
+                groupedRecords[record.name] = []
               }
-              acc[record.name].push({
+              groupedRecords[record.name].push({
                 ...record,
-                studentInfo,
-                lateLessons: getLateLessons(record.time)
+                studentInfo
               })
             }
-            return acc
-          }, {})
-
-          // Sort records by time within each group
-          Object.keys(groupedRecords).forEach(name => {
-            groupedRecords[name].sort((a, b) => {
-              const [aHours, aMinutes] = a.time.split(":").map(Number)
-              const [bHours, bMinutes] = b.time.split(":").map(Number)
-              return (aHours * 60 + aMinutes) - (bHours * 60 + bMinutes)
-            })
           })
 
           setAttendanceData(groupedRecords)
@@ -181,8 +186,8 @@ export default function AdminDashboard() {
       records[0].studentInfo?.id.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  // Function to navigate lessons
-  const navigateLesson = (studentName: string, direction: 'prev' | 'next', maxIndex: number) => {
+  // Function to navigate attendance records
+  const navigateAttendance = (studentName: string, direction: 'prev' | 'next', maxIndex: number) => {
     setVisibleLessonIndices(prev => {
       const currentIndex = prev[studentName] || 0
       let newIndex = direction === 'next' 
@@ -230,17 +235,22 @@ export default function AdminDashboard() {
     try {
       setIsLoading(true)
       
-      // Create worksheet
+      // Create worksheet with new data format
       const ws = XLSX.utils.json_to_sheet(
-        filteredStudents.map(([name, records]) => ({
-          'Student ID': records[0].studentInfo?.id,
-          'Name': records[0].studentInfo?.name,
-          'Class': records[0].studentInfo?.class,
-          'Curator': records[0].studentInfo?.curator,
-          'Time': records[0].time,
-          'Late Lessons': records[0].lateLessons ? records[0].lateLessons.join(", ") : "",
-          'Date': records[0].date
-        }))
+        Object.entries(attendanceData).flatMap(([name, records]) => 
+          records.flatMap(record => 
+            record.attendance_info.map((info, index) => ({
+              'Student ID': record.studentInfo?.id,
+              'Name': record.studentInfo?.name,
+              'Class': record.studentInfo?.class,
+              'Curator': record.studentInfo?.curator,
+              'Time': info.time,
+              'Lesson': info.class,
+              'Status': info.status,
+              'Date': record.date
+            }))
+          )
+        )
       )
 
       // Set column widths
@@ -250,7 +260,8 @@ export default function AdminDashboard() {
         {wch: 8},  // Class
         {wch: 20}, // Curator
         {wch: 10}, // Time
-        {wch: 20}, // Late Lessons
+        {wch: 20}, // Lesson
+        {wch: 10}, // Status
         {wch: 12}  // Date
       ]
       ws['!cols'] = wscols
@@ -398,12 +409,17 @@ export default function AdminDashboard() {
                   <th className="px-4 py-3 text-left font-medium">Name</th>
                   <th className="px-4 py-3 text-left font-medium">Class</th>
                   <th className="px-4 py-3 text-left font-medium">Curator</th>
-                  <th className="px-4 py-3 text-left font-medium">Records</th>
+                  <th className="px-4 py-3 text-left font-medium">Time</th>
+                  <th className="px-4 py-3 text-left font-medium">Status</th>
                   <th className="px-4 py-3 text-left font-medium">Date</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredStudents.map(([name, records]) => (
+                {Object.entries(attendanceData).filter(
+                  ([name, records]) =>
+                    name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    records[0].studentInfo?.id.toLowerCase().includes(searchQuery.toLowerCase())
+                ).map(([name, records]) => (
                   <tr key={name} className="border-b">
                     <td className="px-4 py-3">{records[0].studentInfo?.id}</td>
                     <td className="px-4 py-3">
@@ -424,53 +440,58 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3">{records[0].studentInfo?.curator}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-2">
-                        {records.map((record, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <div className="flex items-center text-sm">
-                              <Clock className="mr-1 h-3 w-3" />
-                              {record.time}
-                            </div>
-                            {record.lateLessons && record.lateLessons.length > 0 && (
-                              <div className="flex items-center gap-1">
-                                {record.lateLessons.length > 1 && (
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => navigateLesson(name, 'prev', record.lateLessons!.length - 1)}
-                                    disabled={visibleLessonIndices[name] === 0}
-                                  >
-                                    <span className="sr-only">Previous</span>
-                                    &lt;
-                                  </Button>
-                                )}
-                                
-                                <Badge variant="destructive">
-                                  {record.lateLessons[visibleLessonIndices[name] || 0]}
-                                </Badge>
-                                
-                                {record.lateLessons.length > 1 && (
-                                  <>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="h-6 w-6 p-0"
-                                      onClick={() => navigateLesson(name, 'next', record.lateLessons!.length - 1)}
-                                      disabled={visibleLessonIndices[name] === record.lateLessons!.length - 1}
-                                    >
-                                      <span className="sr-only">Next</span>
-                                      &gt;
-                                    </Button>
-                                    <span className="text-xs text-muted-foreground">
-                                      {visibleLessonIndices[name] + 1}/{record.lateLessons.length}
-                                    </span>
-                                  </>
-                                )}
-                              </div>
-                            )}
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center text-sm">
+                            <Clock className="mr-1 h-3 w-3" />
+                            {records[0].attendance_info && 
+                             records[0].attendance_info.length > 0 && 
+                             visibleLessonIndices[name] !== undefined ? 
+                             records[0].attendance_info[visibleLessonIndices[name]].time : 
+                             'N/A'}
                           </div>
-                        ))}
+                          {records[0].attendance_info && records[0].attendance_info.length > 1 && (
+                            <div className="flex items-center gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-6 w-6 p-0"
+                                onClick={() => navigateAttendance(name, 'prev', records[0].attendance_info.length - 1)}
+                                disabled={visibleLessonIndices[name] === 0}
+                              >
+                                <span className="sr-only">Previous</span>
+                                &lt;
+                              </Button>
+                              
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-6 w-6 p-0"
+                                onClick={() => navigateAttendance(name, 'next', records[0].attendance_info.length - 1)}
+                                disabled={visibleLessonIndices[name] === records[0].attendance_info.length - 1}
+                              >
+                                <span className="sr-only">Next</span>
+                                &gt;
+                              </Button>
+                              <span className="text-xs text-muted-foreground">
+                                {visibleLessonIndices[name] + 1}/{records[0].attendance_info.length}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      {records[0].attendance_info && 
+                       records[0].attendance_info.length > 0 && 
+                       visibleLessonIndices[name] !== undefined ? 
+                        <Badge variant={
+                          records[0].attendance_info[visibleLessonIndices[name]].status === "after school" 
+                            ? "secondary" 
+                            : "destructive"
+                        }>
+                          {records[0].attendance_info[visibleLessonIndices[name]].status}
+                        </Badge> : 
+                        'N/A'}
                     </td>
                     <td className="px-4 py-3">{formatDate(records[0].date)}</td>
                   </tr>
