@@ -158,7 +158,7 @@ export default function AdminDashboard() {
               
               // Only include records with missed lessons
               const missedLessons = record.attendance_info.filter(
-                info => info.status !== "after school"
+                (info: AttendanceInfo) => info.status !== "after school" && info.status !== "before school"
               )
               
               // Filter out records that are within 5 minutes of each other
