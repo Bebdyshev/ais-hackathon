@@ -158,7 +158,7 @@ export default function AdminDashboard() {
               
               // Only include records with missed lessons
               const missedLessons = record.attendance_info.filter(
-                (info: AttendanceInfo) => info.status !== "after school" && info.status !== "before school"
+                (info: AttendanceInfo) => info.status === "late" || (info.status !== "after school" && info.status !== "before school" && info.status !== "on time")
               )
               
               // Filter out records that are within 5 minutes of each other
@@ -469,14 +469,14 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-2">
                         {records[0].attendance_info && records[0].attendance_info.length > 0 ? 
-                          records[0].attendance_info.map((info, index) => (
+                          records[0].attendance_info.filter(info => info.status === "late").map((info, index) => (
                             <div key={index} className="flex items-center gap-2">
                               <div className="flex items-center text-sm">
                                 <Clock className="mr-1 h-3 w-3" />
                                 {info.time}
                               </div>
                               <Badge variant="destructive">
-                                Lesson {info.class}
+                                Lesson {info.class} - {info.status}
                               </Badge>
                             </div>
                           )) : (
