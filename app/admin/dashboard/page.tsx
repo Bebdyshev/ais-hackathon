@@ -431,6 +431,7 @@ export default function AdminDashboard() {
                   <th className="px-4 py-3 text-left font-medium">Name</th>
                   <th className="px-4 py-3 text-left font-medium">Class</th>
                   <th className="px-4 py-3 text-left font-medium">Curator</th>
+                  <th className="px-4 py-3 text-left font-medium">Last Visit</th>
                   <th className="px-4 py-3 text-left font-medium">Missed Lessons</th>
                   <th className="px-4 py-3 text-left font-medium">Date</th>
                 </tr>
@@ -459,6 +460,12 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-4 py-3">{records[0].studentInfo?.class}</td>
                     <td className="px-4 py-3">{records[0].studentInfo?.curator}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1 text-green-600">
+                        <Clock className="h-3 w-3" />
+                        {records[0].times[0]}
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-2">
                         {records[0].attendance_info && records[0].attendance_info.length > 0 ? 
