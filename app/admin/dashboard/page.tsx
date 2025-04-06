@@ -463,7 +463,7 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 text-green-600">
                         <Clock className="h-3 w-3" />
-                        {records[0].times[0]}
+                        {records[0].times[records[0].times.length - 1]}
                       </div>
                     </td>
                     <td className="px-4 py-3">
