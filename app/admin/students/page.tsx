@@ -116,6 +116,54 @@ export default function StudentsPage() {
   const [attendanceData, setAttendanceData] = useState<Record<string, AttendanceRecord[]>>({})
   const { toast } = useToast()
 
+  // Mock students data
+  const [students, setStudents] = useState<Student[]>([
+    {
+      id: "071004553794",
+      name: "Бердышев Керей",
+      email: "kerey@school.edu",
+      class: "11H",
+      status: "Absent",
+      points: 450,
+      streak: 5,
+      attendanceRate: "98%",
+      lastAttendance: "2025-04-05"
+    },
+    {
+      id: "070708551158",
+      name: "Мажитов Джафар",
+      email: "jafar@school.edu",
+      class: "11D",
+      status: "Absent",
+      points: 380,
+      streak: 3,
+      attendanceRate: "95%",
+      lastAttendance: "2025-04-04"
+    },
+    {
+      id: "080424552629",
+      name: "Габитов Абдулазиз",
+      email: "aziz@school.edu",
+      class: "11H",
+      status: "Absent",
+      points: 410,
+      streak: 4,
+      attendanceRate: "97%",
+      lastAttendance: "2025-04-05"
+    },
+    {
+      id: "071305556238",
+      name: "Коссов Максим",
+      email: "maksim@school.edu",
+      class: "11H",
+      status: "Absent",
+      points: 390,
+      streak: 2,
+      attendanceRate: "94%",
+      lastAttendance: "2025-04-05"
+    }
+  ])
+  
   // Mock user data
   const user = {
     name: "Admin User",
@@ -153,54 +201,6 @@ export default function StudentsPage() {
     }
   }
 
-  // Mock students data
-  const students: Student[] = [
-    {
-      id: "071004553794",
-      name: "Бердышев Керей",
-      email: "kerey@school.edu",
-      class: "11H",
-      status: "Active",
-      points: 450,
-      streak: 5,
-      attendanceRate: "98%",
-      lastAttendance: "2025-04-05"
-    },
-    {
-      id: "070708551158",
-      name: "Мажитов Джафар",
-      email: "jafar@school.edu",
-      class: "11D",
-      status: "Active",
-      points: 380,
-      streak: 3,
-      attendanceRate: "95%",
-      lastAttendance: "2025-04-05"
-    },
-    {
-      id: "080424552629",
-      name: "Габитов Абдулазиз",
-      email: "aziz@school.edu",
-      class: "11H",
-      status: "Active",
-      points: 410,
-      streak: 4,
-      attendanceRate: "97%",
-      lastAttendance: "2025-04-05"
-    },
-    {
-      id: "071305556238",
-      name: "Коссов Максим",
-      email: "maksim@school.edu",
-      class: "11H",
-      status: "Active",
-      points: 390,
-      streak: 2,
-      attendanceRate: "94%",
-      lastAttendance: "2025-04-05"
-    }
-  ]
-
   useEffect(() => {
     const fetchAttendanceData = async () => {
       try {
@@ -212,6 +212,29 @@ export default function StudentsPage() {
         if (response.data.status === "success") {
           // Group records by student name
           const groupedRecords: Record<string, AttendanceRecord[]> = {}
+          
+          // Create a set of student names present in the API response
+          const presentStudents = new Set(response.data.attendance_data.map(record => record.name))
+          
+          // Update mock student statuses based on attendance data
+          console.log(presentStudents)
+          const updatedStudents = students.map(student => {
+            // Get student key by email prefix
+            const studentKey = student.email.split('@')[0].toUpperCase()
+            console.log(studentKey)
+            // Check if student is present in the API response
+            if (presentStudents.has(studentKey)) {
+              console.log(studentKey + "student is present")
+              console.log({ ...student, status: "Active" })
+              return { ...student, status: "Active" }
+              
+            } else {
+              return { ...student, status: "Absent" }
+            }
+          })
+          
+          // Update students array
+          setStudents(updatedStudents)
           
           response.data.attendance_data.forEach(record => {
             const studentInfo = studentInfoDict[record.name]
@@ -412,6 +435,7 @@ export default function StudentsPage() {
                   <th className="px-4 py-3 text-left font-medium">ID</th>
                   <th className="px-4 py-3 text-left font-medium">Name</th>
                   <th className="px-4 py-3 text-left font-medium">Email</th>
+                  <th className="px-4 py-3 text-left font-medium">Class</th>
                   <th className="px-4 py-3 text-left font-medium">Status</th>
                   <th className="px-4 py-3 text-left font-medium">Streak</th>
                   <th className="px-4 py-3 text-left font-medium">Attendance</th>
@@ -425,9 +449,9 @@ export default function StudentsPage() {
                     <td className="px-4 py-3">{student.id}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <Avatar className={`h-8 w-8 border-2 ${student.status === "Active" ? "border-primary/20" : "border-yellow-500/20"}`}>
+                        <Avatar className={`h-8 w-8 border-2 ${student.status === "Active" ? "border-green-500/20" : "border-red-500/20"}`}>
                           <AvatarImage src="/" alt={student.name} />
-                          <AvatarFallback className={`${student.status === "Active" ? "bg-primary/10 text-primary" : "bg-yellow-500/10 text-yellow-600"}`}>
+                          <AvatarFallback className={`${student.status === "Active" ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}>
                             {student.name
                               .split(" ")
                               .map((n) => n[0])
@@ -439,6 +463,9 @@ export default function StudentsPage() {
                     </td>
                     <td className="px-4 py-3">{student.email}</td>
                     <td className="px-4 py-3">{student.class}</td>
+                    <td className="px-4 py-3">
+                      <Badge variant={student.status === "Active" ? "default" : "destructive"}>{student.status}</Badge>
+                    </td>
                     <td className="px-4 py-3">{student.streak} days</td>
                     <td className="px-4 py-3">{student.attendanceRate}</td>
                     <td className="px-4 py-3">{formatDate(student.lastAttendance)}</td>

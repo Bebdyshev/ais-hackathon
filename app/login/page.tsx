@@ -21,6 +21,11 @@ export default function LoginPage() {
 
   // Check if user is already logged in
   useEffect(() => {
+    // Clear localStorage when visiting login page
+    localStorage.removeItem('userRole')
+    localStorage.removeItem('userEmail')
+    localStorage.removeItem('userName')
+    
     const userRole = localStorage.getItem('userRole')
     const userEmail = localStorage.getItem('userEmail')
     
